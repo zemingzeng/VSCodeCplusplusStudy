@@ -51,6 +51,7 @@ public:
     }
     ~Apple()
     {
+        Apple::begin();
         Util::LOGI("Apple's price:%d destructor!", price);
     }
 };
@@ -83,7 +84,14 @@ public:
     {
         Util::LOGI("Water's destructor!");
     }
+
+public:
+    static Apple *const apple;
+    // const static int * intNum = nullptr;
+    const static int intNum = 0;
 };
+
+Apple *const Water::apple = nullptr;
 
 class PersonB; // 类的前向声明，用于解决循环依赖问题
 class PersonA
@@ -106,6 +114,8 @@ public:
 };
 
 Apple createApple();
+
+#include <chrono>
 
 void CplusplusStudy::study()
 {
@@ -349,6 +359,13 @@ void CplusplusStudy::study()
     Util::LOGI("int *pInt4[3];  int *(*pInt5)[3] = &pInt4;   int *(*(*pInt6))[3] = &pInt5;  pInt5:%p,pInt5+1:%p,pInt6:%p,pInt6+1:%p", pInt5, pInt5 + 1, pInt6, pInt6 + 1);
     Apple apple7; // default constructor will be called
 
+    Util::LOGI("\n-----------------20230327----------------------");
+    // 当前时间，单位us
+    chrono::system_clock::time_point time_now = chrono::system_clock::now();
+    chrono::system_clock::duration time_now_duration = time_now.time_since_epoch();
+    time_t time_now_us = chrono::duration_cast<chrono::microseconds>(time_now_duration).count();
+    Util::LOGI("now time is :%lld us", time_now_us);
+
     // temp test
     tempTest();
     Util::LOGI("\nEnd----------------------------------------------------------------------------------------");
@@ -399,6 +416,44 @@ public: // 结构体默认访问权限是public
     int price;
 } appleST1;
 
+#include <math.h>
+
+class Sun
+{
+public:
+    virtual void run()
+    {
+        Util::LOGI("Sun::run");
+    }
+    void start()
+    {
+        Sun::run();
+        run();
+    }
+    virtual void life() = 0;
+
+protected:
+    int temperature = 199;
+
+private:
+    int distance = 0;
+};
+
+class Sun1 : public Sun
+{
+public:
+    void run() override
+    {
+        Util::LOGI("Sun1::run");
+    }
+
+    void life() override
+    {
+    }
+};
+
+#include "DemuxThread.h"
+
 void tempTest()
 {
     Util::LOGI("\n\n\n-----------------tempTest:20230314----------------------");
@@ -423,7 +478,14 @@ void tempTest()
     auto smPInt1 = unique_ptr<int, decltype(&myDeleter)>{new int(7), myDeleter};
     auto smPInt2 = shared_ptr<int>{new int(7), myDeleter};
 
-    Util::LOGI("\n-----------------tempTest:20230317----------------------");
+    Util::LOGI("\n-----------------tempTest:20230330----------------------");
+    Sun1 sun1;
+    Sun *pSun = &sun1;
+    pSun->Sun::run();
+    pSun->start();
+    // thread
+    DemuxThread demuxThread;
+    demuxThread.run();
 }
 
 void func3()
