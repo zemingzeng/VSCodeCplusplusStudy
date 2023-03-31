@@ -452,7 +452,7 @@ public:
     }
 };
 
-#include "DemuxThread.h"
+#include "demuxThread.h"
 
 void tempTest()
 {
@@ -483,9 +483,21 @@ void tempTest()
     Sun *pSun = &sun1;
     pSun->Sun::run();
     pSun->start();
+
+    Util::LOGI("\n-----------------tempTest:20230331----------------------");
     // thread
+    std::thread::id threadId = this_thread::get_id();
+    cout << "Current thread id:" << threadId << endl;
+    int returnNumber = [&](int number) -> int
+    {
+        Util::LOGI("Lamda method! return number:%d", number);
+        return number;
+    }(1);
     DemuxThread demuxThread;
-    demuxThread.run();
+    demuxThread.init();
+    demuxThread.start();
+    demuxThread.join();
+    
 }
 
 void func3()

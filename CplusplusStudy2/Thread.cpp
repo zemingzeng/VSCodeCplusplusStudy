@@ -1,8 +1,9 @@
-#include "Thread.h"
+#include "thread.h"
 #include "Util.hpp"
 using namespace mingzz;
 Thread::Thread()
 {
+    Util::LOGI("Thread constructor!");
 }
 
 Thread::~Thread()
@@ -16,14 +17,16 @@ Thread::~Thread()
 
 int Thread::start()
 {
+    Util::LOGI("Thread::start()");
     return 0;
 }
 
 int Thread::stop()
 {
+    Util::LOGI("Thread::stop()");
     if (t)
     {
-        t->join();
+        //t->join(); //等待任务完成然后才delete
         delete t;
         t = nullptr;
     }

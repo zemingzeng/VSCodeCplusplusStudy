@@ -9,10 +9,12 @@ public:
     ~Thread();
     int start();
     int stop();
-    virtual void run() = 0;
+
+private:
 
 protected:
     std::thread *t = nullptr;
+    virtual void run() = 0;
 };
 
 #endif

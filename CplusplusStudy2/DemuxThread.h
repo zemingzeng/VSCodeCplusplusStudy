@@ -6,7 +6,16 @@
 class DemuxThread : public Thread
 {
 public:
+    int init();
+    int start();
+    int stop();
+    void join();
+
+protected:
     void run() override;
+
+private:
+    std::string url;
 };
 
 #endif
