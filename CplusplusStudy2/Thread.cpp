@@ -26,8 +26,10 @@ int Thread::stop()
     Util::LOGI("Thread::stop()");
     if (t)
     {
-        //t->join(); //等待任务完成然后才delete
+        // t->join(); //等待任务完成然后才delete
+        Util::LOGI("before delete t");
         delete t;
+        Util::LOGI("after delete t");
         t = nullptr;
     }
     return 0;

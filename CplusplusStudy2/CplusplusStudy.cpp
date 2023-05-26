@@ -450,9 +450,48 @@ public:
     void life() override
     {
     }
+    static void hot()
+    {
+        Util::LOGI("sun1 hot");
+    }
 };
 
 #include "demuxThread.h"
+#include "safequeue.h"
+
+enum class CharNumber : char
+{
+    A = 1,
+    B,
+
+};
+
+auto traillingFunc() -> double
+{
+    Util::LOGI("tailling return type function");
+    return 0.999;
+}
+
+#define SUNHOT Sun1::hot;
+
+class Watermelon
+{
+
+public:
+    Watermelon() = default;
+    Watermelon(const Watermelon &)
+    {
+        Util::LOGI("Watermelon copy constructor! (only occurs initialize)");
+    }
+    Watermelon &
+    operator=(const Watermelon &)
+    {
+        Util::LOGI("Watermelon assign operator!");
+        return *this;
+    }
+};
+
+#include <typeinfo.h>
 
 void tempTest()
 {
@@ -496,11 +535,51 @@ void tempTest()
     DemuxThread demuxThread;
     demuxThread.init();
     demuxThread.start();
+    // demuxThread.detach();
     demuxThread.join();
-    
+
+    Util::LOGI("\n-----------------tempTest:20230403----------------------");
+    // safe queue
+    // SafeQueue<int> safeQueue;
+    // safeQueue.abort();
+
+    Util::LOGI("\n-----------------tempTest:20230404----------------------");
+    CharNumber enumChar = CharNumber::A;
+
+    Util::LOGI("\n-----------------tempTest:20230406----------------------");
+    // std::this_thread::sleep_for(std::chrono::milliseconds(8000));
+    // pthread_exit(nullptr);
+    Util::LOGI("temp test 1.......");
+    traillingFunc();
+
+    Util::LOGI("\n-----------------tempTest:20230407----------------------");
+    Sun1::hot();
+    // SUNHOT();
+    int number1 = 800;
+    int *pNumber2 = &number1;
+    int *pNumber1 = nullptr;
+    int **ppNumber1 = &pNumber1;
+    *ppNumber1 = pNumber2;
+    Util::LOGI("pNumber1 : %d", *pNumber1);
+
+    Util::LOGI("\n-----------------tempTest:20230526----------------------");
+    Watermelon watermelon1, watermelon2;
+    watermelon1 = watermelon2;
 }
+
+class SingleTon
+{
+public:
+    static void instance()
+    {
+        Util::LOGI("SingleTon instance!!");
+    }
+};
+
+#define SingleInstace SingleTon::instance;
 
 void func3()
 {
     Util::LOGI("this is FUNCTION1 func3!!!");
+    // SingleInstace();
 };

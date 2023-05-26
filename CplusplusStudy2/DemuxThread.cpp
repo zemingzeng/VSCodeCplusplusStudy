@@ -9,7 +9,7 @@ void DemuxThread::run()
     std::thread::id threadId = std::this_thread::get_id();
     std::cout << "Current thread id:" << threadId << std::endl;
     int count = 0;
-    while (count < 100)
+    while (count < 3)
     {
         Util::LOGI("DemuxThread running and count:%d", count);
         std::this_thread::sleep_for(std::chrono::milliseconds(1500));
@@ -24,6 +24,15 @@ void DemuxThread::join()
     {
         t->join();
     }
+}
+
+void DemuxThread::detach()
+{
+      Util::LOGI("DemuxThread detach()!");
+    if (t)
+    {
+        t->detach();
+    } 
 }
 
 int DemuxThread::init()
