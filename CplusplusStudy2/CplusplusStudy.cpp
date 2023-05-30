@@ -474,11 +474,36 @@ auto traillingFunc() -> double
 
 #define SUNHOT Sun1::hot;
 
+class Pear
+{
+public:
+    Pear()
+    {
+        Util::LOGI("Pear()!");
+    }
+};
+
 class Watermelon
 {
 
+private:
+    int count = 9;
+
+protected:
+    int weight = 10;
+
 public:
-    Watermelon() = default;
+    int price = 0;
+    Pear pear1;
+    Pear pear2;
+    friend void iamFriendMethod(const Watermelon &);
+    //不要把自己的声明成友元来获取访问权限，这种打破了类的安全性和封装性
+    //friend class Watermelon;
+    Watermelon() : price{price == 0 ? 100 : 99}
+    {
+        pear1 = pear2;
+        Util::LOGI("Watermelon price--->%d", price);
+    };
     Watermelon(const Watermelon &)
     {
         Util::LOGI("Watermelon copy constructor! (only occurs initialize)");
@@ -490,6 +515,14 @@ public:
         return *this;
     }
 };
+
+void iamFriendMethod(const Watermelon &watermelon)
+{
+    Util::LOGI("iamFriendMethod of the class Watermelon,Its private count->%d,protected weight->% d,public price->% d ",
+               watermelon.count,
+               watermelon.weight,
+               watermelon.price);
+}
 
 #include <typeinfo.h>
 
@@ -512,8 +545,8 @@ void tempTest()
     pFunc2();
     func3();
     funcTypeParamMethod(pFunc1);
-    Util::LOGI("typeid(decltype(function1)).name():%s", typeid(decltype(function1)).name());
-    Util::LOGI("typeid(decltype(&function1)).name():%s", typeid(decltype(&function1)).name());
+    // Util::LOGI("typeid(decltype(function1)).name():%s", typeid(decltype(function1)).name());
+    // Util::LOGI("typeid(decltype(&function1)).name():%s", typeid(decltype(&function1)).name());
     auto smPInt1 = unique_ptr<int, decltype(&myDeleter)>{new int(7), myDeleter};
     auto smPInt2 = shared_ptr<int>{new int(7), myDeleter};
 
@@ -563,8 +596,14 @@ void tempTest()
     Util::LOGI("pNumber1 : %d", *pNumber1);
 
     Util::LOGI("\n-----------------tempTest:20230526----------------------");
-    Watermelon watermelon1, watermelon2;
-    watermelon1 = watermelon2;
+    Watermelon watermelon1;
+    // watermelon1 = watermelon2;
+
+    Util::LOGI("\n-----------------tempTest:20230529----------------------");
+    // 初始化列表是用来初始化的，构造函数体内是用来赋值的
+
+    Util::LOGI("\n-----------------tempTest:20230530----------------------");
+    iamFriendMethod(watermelon1);
 }
 
 class SingleTon
