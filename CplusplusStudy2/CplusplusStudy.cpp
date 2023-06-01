@@ -477,6 +477,7 @@ auto traillingFunc() -> double
 class Pear
 {
 public:
+    int *pInt = nullptr;
     Pear()
     {
         Util::LOGI("Pear()!");
@@ -497,8 +498,8 @@ public:
     Pear pear1;
     Pear pear2;
     friend void iamFriendMethod(const Watermelon &);
-    //不要把自己的声明成友元来获取访问权限，这种打破了类的安全性和封装性
-    //friend class Watermelon;
+    // 不要把自己的声明成友元来获取访问权限，这种打破了类的安全性和封装性
+    // friend class Watermelon;
     Watermelon() : price{price == 0 ? 100 : 99}
     {
         pear1 = pear2;
@@ -524,7 +525,11 @@ void iamFriendMethod(const Watermelon &watermelon)
                watermelon.price);
 }
 
+#include <utility>
 #include <typeinfo.h>
+
+void func4(int &&);
+void func5(int &&);
 
 void tempTest()
 {
@@ -604,6 +609,33 @@ void tempTest()
 
     Util::LOGI("\n-----------------tempTest:20230530----------------------");
     iamFriendMethod(watermelon1);
+
+    Util::LOGI("\n-----------------tempTest:20230531----------------------");
+    // 符号优先级：（） > [](从左到右结合) > *(从右到左结合) 比如int(*a)[2]
+    //()优先级高，所以代表a是一个指针，然后是[],代表这个指针指向一个数组，int表示数组的元素类型
+    // 即代表a是数组指针，指向int[2]
+    int array[2][2] = {0};
+    int(*pArray)[2] = &array[0]; // 数组指针，&array[0]不是代表元素的双重指针，
+                                 // 虽然array[0]代表的是int*,但是&array[0]不代表双重指针
+    int array1[2] = {0};
+    int(*pArray1)[2] = &array1;   // 数组指针
+    int *pInt = new int[2];       // new 返回的都是地址，和数组声明不一样
+    int **pArray2 = new int *[2]; // 所以双重指针就可以用来表示二维数组
+    pArray2[0] = new int[3];
+    int(*pArray3)[2] = new int[2][2]; // new int[2][2]返回的int（*）[2]而不是int* ,需要注意下！！
+
+    Util::LOGI("\n-----------------tempTest:20230601----------------------");
+    int number2 = 10;
+    int number3 = 19;
+    Util::LOGI("before swap:number2--->%d,number3--->%d", number2, number3);
+    std::swap(number2, number3);
+    Util::LOGI("after swap:number2--->%d,number3--->%d", number2, number3);
+    Pear pear1, pear2;
+    pear1.pInt = new int(1);
+    Util::LOGI("before swap:pear1--->%p,pear2--->%p", pear1, pear2);
+    std::swap(pear1, pear2);
+    Util::LOGI("after swap:pear1--->%p,pear2--->%p", pear1, pear2);
+    func4(2023);
 }
 
 class SingleTon
@@ -622,3 +654,18 @@ void func3()
     Util::LOGI("this is FUNCTION1 func3!!!");
     // SingleInstace();
 };
+
+void func4(int &&rInt)
+{
+    rInt = 9; // 此时rInt其实是个左值了
+              // 右值引用和左值引用都是左值！！！
+              // 右值引用可扩展右值的生命周期和用于移动语义操作
+    // int *p = &std::move(rInt); //error! 右值不可以取地址
+    int *pInt = &rInt;
+    func5(std::move(rInt)); // move将左值转化成右值引用从而触发移动语义，
+                            // 实现资源的高效转移而不进行深层的复制
+                            // 被move后对象，不应该使用，因为可能造成未定义的行为
+}
+void func5(int &&rInt)
+{
+}
