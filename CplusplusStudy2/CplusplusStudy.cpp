@@ -477,10 +477,42 @@ auto traillingFunc() -> double
 class Pear
 {
 public:
+    int price = 0;
     int *pInt = nullptr;
+    Sun1 *sun;
     Pear()
     {
         Util::LOGI("Pear()!");
+    }
+    Pear(int price)
+    {
+        this->price = price;
+        Util::LOGI("Pear(int price)!");
+    }
+    Pear &operator=(const Pear &) // copy assignment operator
+    {
+        Util::LOGI("Pear &operator=(const Pear &)!");
+        return *this;
+    }
+    Pear(const Pear &) // copy constructor
+    {
+        Util::LOGI("Pear(const Pear &)!");
+    }
+    Pear(Pear &&) // move constructor
+    {
+        Util::LOGI("Pear(Pear&&)!");
+    }
+    Pear &operator=(Pear &&src) // move assignment operator > copy assignment operator
+    {
+        this->sun = src.sun;
+        src.sun = nullptr;
+        Util::LOGI("Pear &operator=(Pear &&src)! this price:%d,src price:%d", this->price, src.price);
+        return *this;
+    }
+
+    ~Pear()
+    {
+        Util::LOGI(" ~Pear()! price--->%d", price);
     }
 };
 
@@ -528,8 +560,87 @@ void iamFriendMethod(const Watermelon &watermelon)
 #include <utility>
 #include <typeinfo.h>
 
+void test20230605()
+{
+    Pear A, B;
+    Pear &&C = Pear{};
+    A = C;                      // 调用copy函数
+    B = Pear{};                 // 如果有move assignment operator函数就调用move函数，如果没有就调用copy assignment operator函数
+    Pear D = std::move(Pear{}); // 如果有move函数，则调用move构造函数，如果没得即调用copy构造函数
+}
+
 void func4(int &&);
 void func5(int &&);
+
+class Me
+{
+public:
+    Pear pear;
+    Me() : pear{Pear(5)}
+    {
+        Pear pear1 = Pear{3};
+        pear = pear1;   // 调用的copy assignment operator
+        pear = Pear{3}; // 调用的是move assignment operator不是copy assignment operator,
+                        //  因为Pear{3}是个临时变量，可被当作右值引用
+        Pear &&rfPear1 = Pear{9};
+        rfPear1.sun = new Sun1();
+        Util::LOGI("rfPear1 origin rfPear1 sun:%p", rfPear1.sun);
+        pear = std::move(rfPear1); // 调用的是move assignment operator
+                                   // 编译器默认生成的move函数并不会置空指针变量，需要自己实现
+        Util::LOGI("after 'move assignment operator' rfPear1 sun:%p", rfPear1.sun);
+        Util::LOGI("after 'move assignment operator' pear sun:%p", pear.sun);
+        pear = rfPear1;                  // 调用的copy assignment operator
+        Pear pear2 = rfPear1;            // 调用的copy constructor
+        Pear pear3 = std::move(rfPear1); // 调用的move constructor
+        Util::LOGI(" Me()! end!");
+    }
+};
+
+class MutableStudy
+{
+public:
+    mutable int counts = 99; // mutable 此关键字标记的成员可以const方法中被改变
+    int counts1 = 10;
+    void modify() const
+    {
+        counts++;
+        Util::LOGI("void modify() const modify member counts->%d", counts);
+        // counts1++; error
+    }
+};
+class RefMethod
+{
+public:
+    int nonTempGetInt() const &
+    {
+        Util::LOGI("int nonTempGetInt() &!");
+        return 0;
+    }
+    int tempGetInt() &&
+    {
+        Util::LOGI("int tempGetInt() &&!");
+        return 0;
+    }
+    int play() const
+    {
+        nonTempGetInt();
+        return 0;
+    }
+};
+
+void test20230606()
+{
+    RefMethod refMethod;
+    refMethod.nonTempGetInt();
+    // refMethod.tempGetInt(); error
+    std::move(refMethod).tempGetInt();
+    RefMethod{}.tempGetInt();
+    // std::move(refMethod).nonTempGetInt(); error
+    const RefMethod refMethod1;
+    refMethod1.play();
+    RefMethod refMethod2;
+    refMethod2.play();
+}
 
 void tempTest()
 {
@@ -636,6 +747,21 @@ void tempTest()
     std::swap(pear1, pear2);
     Util::LOGI("after swap:pear1--->%p,pear2--->%p", pear1, pear2);
     func4(2023);
+    Util::LOGI("Me me1....................................");
+    Me me1;
+
+    Util::LOGI("\n-----------------tempTest:20230602----------------------");
+
+    Util::LOGI("\n-----------------tempTest:20230605----------------------");
+    int number4 = 8, number5 = 9;
+    Util::LOGI("before exchange:number4->%d,number5->%d", number4, number5);
+    int number6 = exchange(number4, number5); // 这个函数可以帮助更好实现move函数。
+    Util::LOGI("after exchange:number4->%d,number5->%d,return value->%d", number4, number5, number6);
+
+    Util::LOGI("\n-----------------tempTest:20230606----------------------");
+    MutableStudy mutableStudy;
+    mutableStudy.modify();
+    test20230606();
 }
 
 class SingleTon
