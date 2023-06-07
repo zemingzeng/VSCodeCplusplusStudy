@@ -642,6 +642,35 @@ void test20230606()
     refMethod2.play();
 }
 
+class ConstOverloadClass
+{
+
+public:
+    void constOverloadFunc() const
+    {
+        Util::LOGI("void constOverloadFunc() const!");
+    }
+    void constOverloadFunc()
+    {
+        Util::LOGI("void constOverloadFunc()!");
+    }
+};
+
+void test20230607()
+{
+    const ConstOverloadClass constConstOverloadClass;
+    ConstOverloadClass nonConstconstOverloadClass;
+    Util::LOGI("constConstOverloadClass.constOverloadFunc()-->");
+    constConstOverloadClass.constOverloadFunc();
+    Util::LOGI("nonConstconstOverloadClass.constOverloadFunc()-->");
+    nonConstconstOverloadClass.constOverloadFunc();
+    // 打印信息：
+    // constConstOverloadClass.constOverloadFunc()-->
+    // void constOverloadFunc() const!
+    // nonConstconstOverloadClass.constOverloadFunc()-->
+    // void constOverloadFunc()!
+}
+
 void tempTest()
 {
     Util::LOGI("\n\n\n-----------------tempTest:20230314----------------------");
@@ -762,6 +791,9 @@ void tempTest()
     MutableStudy mutableStudy;
     mutableStudy.modify();
     test20230606();
+
+    Util::LOGI("\n-----------------tempTest:20230607----------------------");
+    test20230607();
 }
 
 class SingleTon
