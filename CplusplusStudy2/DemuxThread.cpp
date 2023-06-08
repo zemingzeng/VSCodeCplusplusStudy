@@ -12,7 +12,7 @@ void DemuxThread::run()
     while (count < 3)
     {
         Util::LOGI("DemuxThread running and count:%d", count);
-        std::this_thread::sleep_for(std::chrono::milliseconds(1500));
+        std::this_thread::sleep_for(std::chrono::milliseconds(500));
         count++;
     }
 }

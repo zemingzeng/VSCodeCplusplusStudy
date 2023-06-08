@@ -656,6 +656,8 @@ public:
     }
 };
 
+// #define mingzzLog(...) Util::LOGI(const char *__format, ...);
+
 void test20230607()
 {
     const ConstOverloadClass constConstOverloadClass;
@@ -669,6 +671,35 @@ void test20230607()
     // void constOverloadFunc() const!
     // nonConstconstOverloadClass.constOverloadFunc()-->
     // void constOverloadFunc()!
+}
+
+class StaticMemberClass
+{
+public:
+    int nonStaticNumber = 12;
+    static int staticNumber;
+    const static int constStaticNumber = 89;
+    const static int constStaticNumber1;
+    // const static float constStaticNumber2=1.0f; // error: 'constexpr' needed for in-class initialization of static data member
+                                                    //'const float StaticMemberClass::constStaticNumber2' of non-integral type [-fpermissive]
+    const int constNumber;
+    StaticMemberClass() : constNumber(0), nonStaticNumber(12)
+    {
+    }
+};
+int StaticMemberClass::staticNumber = 345;
+const int StaticMemberClass::constStaticNumber1 = 678;
+void test20230608()
+{
+    StaticMemberClass staticMemberClass;
+    Util::LOGI("staticMemberClass nonStaticNumber->%d,staticNumber->%d,constStaticNumber->%d,constNumber->%d,constStaticNumber1->%d",
+               staticMemberClass.nonStaticNumber,
+               StaticMemberClass::staticNumber,
+               StaticMemberClass::constStaticNumber,
+               staticMemberClass.constNumber,
+               StaticMemberClass::constStaticNumber1);
+    // 打印信息
+    // staticMemberClass nonStaticNumber->12,staticNumber->345,constStaticNumber->89,constNumber->0,constStaticNumber1->678
 }
 
 void tempTest()
@@ -794,6 +825,9 @@ void tempTest()
 
     Util::LOGI("\n-----------------tempTest:20230607----------------------");
     test20230607();
+
+    Util::LOGI("\n-----------------tempTest:20230608----------------------");
+    test20230608();
 }
 
 class SingleTon
@@ -802,6 +836,9 @@ public:
     static void instance()
     {
         Util::LOGI("SingleTon instance!!");
+    }
+    SingleTon()
+    {
     }
 };
 
