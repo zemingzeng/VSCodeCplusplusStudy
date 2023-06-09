@@ -681,7 +681,7 @@ public:
     const static int constStaticNumber = 89;
     const static int constStaticNumber1;
     // const static float constStaticNumber2=1.0f; // error: 'constexpr' needed for in-class initialization of static data member
-                                                    //'const float StaticMemberClass::constStaticNumber2' of non-integral type [-fpermissive]
+    //'const float StaticMemberClass::constStaticNumber2' of non-integral type [-fpermissive]
     const int constNumber;
     StaticMemberClass() : constNumber(0), nonStaticNumber(12)
     {
@@ -700,6 +700,94 @@ void test20230608()
                StaticMemberClass::constStaticNumber1);
     // 打印信息
     // staticMemberClass nonStaticNumber->12,staticNumber->345,constStaticNumber->89,constNumber->0,constStaticNumber1->678
+}
+
+class InlineStaticMemberClass
+{
+public:
+    static inline int staticInlineNumber = 19;
+    const int number;
+    InlineStaticMemberClass() : number{777}
+    {
+        Util::LOGI("InlineStaticMemberClass() : number{7}!");
+    }
+    InlineStaticMemberClass(int number) : number(number)
+    {
+        Util::LOGI("InlineStaticMemberClass(int number)!");
+        // this->number = number;
+    }
+    InlineStaticMemberClass(const InlineStaticMemberClass &) : InlineStaticMemberClass()
+    {
+        Util::LOGI("InlineStaticMemberClass(const InlineStaticMemberClass &) : InlineStaticMemberClass()!");
+    }
+};
+
+class OuterClass
+{
+public:
+    int OuterClassPublicNumber;
+    class InnerClass
+    {
+    public:
+        void test(const OuterClass &outerClass)
+        {
+            // 内部类可以访问外部类的private protected成员
+            int addPrivateAndProtected = outerClass.outerClassPrivateNumber + outerClass.outerClassProtectedNumber;
+            Util::LOGI("InnerClass addPrivateAndProtected->%d", addPrivateAndProtected);
+        }
+        int innerClassPublicNumber;
+
+    private:
+        int innerClassPrivateNumber;
+
+    protected:
+        int innerClassProtectedNumber;
+    };
+    void test(const InnerClass &innerClass)
+    {
+        // 外部类只能访问内部类的public成员
+        Util::LOGI("InnerClass innerClassPublicNumber->%d", innerClass.innerClassPublicNumber);
+        // innerClass.innerClassPrivateNumber; //error
+        // innerClass.innerClassProtectedNumber; //error
+
+        //外部类里面可以访问private和protected的内部类
+        OuterClass::InnerPrivateClass;   // ok
+        OuterClass::InnerProtectedClass; // ok
+    }
+
+private:
+    class InnerPrivateClass
+    {
+    };
+    int outerClassPrivateNumber;
+
+protected:
+    class InnerProtectedClass
+    {
+    };
+    int outerClassProtectedNumber;
+};
+
+void test20230609()
+{
+    InlineStaticMemberClass inlineStaticMemberClass(200);
+    Util::LOGI("inlineStaticMemberClass staticInlineNumber->%d,const int number->%d",
+               InlineStaticMemberClass::staticInlineNumber, inlineStaticMemberClass.number);
+    InlineStaticMemberClass inlineStaticMemberClass1 = inlineStaticMemberClass;
+    Util::LOGI("inlineStaticMemberClass1 number->%d", inlineStaticMemberClass1.number);
+    // 打印信息:
+    // InlineStaticMemberClass(int number)!
+    // inlineStaticMemberClass staticInlineNumber->19,const int number->200
+    // InlineStaticMemberClass() : number{7}!
+    // InlineStaticMemberClass(const InlineStaticMemberClass &) : InlineStaticMemberClass()!
+    // inlineStaticMemberClass1 number->777
+    OuterClass outerClass;
+    OuterClass::InnerClass innerClass;
+    outerClass.test(innerClass);
+    innerClass.test(outerClass);
+    // 外部类外面只能访问public声明的内部类
+    //  OuterClass::InnerPrivateClass;//error
+    //  OuterClass::InnerProtectedClass;//error
 }
 
 void tempTest()
@@ -828,6 +916,9 @@ void tempTest()
 
     Util::LOGI("\n-----------------tempTest:20230608----------------------");
     test20230608();
+
+    Util::LOGI("\n-----------------tempTest:20230609----------------------");
+    test20230609();
 }
 
 class SingleTon
