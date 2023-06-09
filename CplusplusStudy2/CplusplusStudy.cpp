@@ -750,9 +750,9 @@ public:
         // innerClass.innerClassPrivateNumber; //error
         // innerClass.innerClassProtectedNumber; //error
 
-        //外部类里面可以访问private和protected的内部类
-        OuterClass::InnerPrivateClass;   // ok
-        OuterClass::InnerProtectedClass; // ok
+        // 外部类里面可以访问private和protected的内部类
+        OuterClass::InnerPrivateClass innerPrivateClass;     // ok
+        OuterClass::InnerProtectedClass InnerProtectedClass; // ok
     }
 
 private:
@@ -766,6 +766,34 @@ protected:
     {
     };
     int outerClassProtectedNumber;
+};
+
+class OverloadOperatorClass
+{
+public:
+    void operator()()
+    {
+        Util::LOGI("OverloadOperatorClass void operator()()!");
+    }
+    void operator-()
+    {
+        Util::LOGI("OverloadOperatorClass void operator-()!");
+    }
+    operator int() // operator <type> 隐式转换函数重载
+    {
+        Util::LOGI("OverloadOperatorClass operator int()!");
+        return 1;
+    }
+    operator double() // operator <type> 隐式转换函数重载
+    {
+        Util::LOGI("OverloadOperatorClass operator double()!");
+        return 1.0f;
+    }
+    operator Apple() // operator <type> 隐式转换函数重载
+    {
+        Util::LOGI("OverrideOperatorClass operator Apple()!");
+        return Apple{};
+    }
 };
 
 void test20230609()
@@ -788,6 +816,29 @@ void test20230609()
     // 外部类外面只能访问public声明的内部类
     //  OuterClass::InnerPrivateClass;//error
     //  OuterClass::InnerProtectedClass;//error
+
+    OverloadOperatorClass overloadOperatorClass;
+    overloadOperatorClass.operator()(); // 全名调用
+    overloadOperatorClass();            // 省略调用
+    overloadOperatorClass.operator-();  // 全名调用
+    // overrideOperatorClass-; //error 不能这么调用，可能需要一个参数
+    // 打印信息：
+    // OverrideOperatorClass void operator()()!
+    // OverrideOperatorClass void operator()()!
+    // OverrideOperatorClass void operator-()!
+
+    // 隐式调用的常见的几种方式如下：
+    Apple apple = overloadOperatorClass.operator Apple(); // operator Apple() :全名称调用
+    Apple apple1 = overloadOperatorClass;
+    Apple apple2 = static_cast<Apple>(overloadOperatorClass); // 显示转换也会调用隐式转换重载（如果存在）
+    int number = overloadOperatorClass;                       // operator int()
+    double number1 = overloadOperatorClass;                   // operator double()
+    // 打印信息：
+    // OverrideOperatorClass operator Apple()!
+    // OverrideOperatorClass operator Apple()!
+    // OverrideOperatorClass operator Apple()!
+    // OverloadOperatorClass operator int()!
+    // OverloadOperatorClass operator double()!
 }
 
 void tempTest()
