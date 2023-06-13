@@ -841,6 +841,104 @@ void test20230609()
     // OverloadOperatorClass operator double()!
 }
 
+class GlobalOperatorOverloadClass
+{
+public:
+    void operator+(const GlobalOperatorOverloadClass &r)
+    {
+        Util::LOGI("void operator+(const GlobalOperatorOverloadClass&r)!");
+    }
+    void operator+()
+    {
+        Util::LOGI("void operator+()!");
+    }
+    // void operator+(const GlobalOperatorOverloadClass &l,const GlobalOperatorOverloadClass &r); //在类内部重载操作运算符只能有<=1的参数个数
+};
+GlobalOperatorOverloadClass operator-(const GlobalOperatorOverloadClass &l, const GlobalOperatorOverloadClass &r)
+{
+    Util::LOGI("GlobalOperatorOverloadClass operator+(const GlobalOperatorOverloadClass &l,const GlobalOperatorOverloadClass &r)!");
+    return GlobalOperatorOverloadClass{};
+}
+
+void test20230612()
+{
+    GlobalOperatorOverloadClass GlobalOperatorOverloadClass1, GlobalOperatorOverloadClass2, GlobalOperatorOverloadClass3;
+    GlobalOperatorOverloadClass1.operator+();
+    GlobalOperatorOverloadClass1.operator+(GlobalOperatorOverloadClass2);
+    // 全局的operator重载可以最多有2个参数 ，但是在类中定义的操作符重载方法最多只能有一个参数
+    GlobalOperatorOverloadClass3 = GlobalOperatorOverloadClass1 - GlobalOperatorOverloadClass2;
+    GlobalOperatorOverloadClass1 + GlobalOperatorOverloadClass2;
+    // 打印信息：
+    // void operator+()!
+    // void operator+(const GlobalOperatorOverloadClass&r)!
+    // GlobalOperatorOverloadClass operator+(const GlobalOperatorOverloadClass &l,const GlobalOperatorOverloadClass &r)!
+    // void operator+(const GlobalOperatorOverloadClass&r)!
+}
+
+class BaseClass
+{
+public:
+    virtual void BaseClassVirtualMethod()
+    {
+        Util::LOGI("virtual void BaseClassVirtualMethod()!");
+    }
+
+protected:
+    int BaseClassProtectednumber = 1;
+
+private:
+    int BaseClassPrivatenumber = 2;
+
+public:
+    int BaseClassPublicnumber = 3;
+};
+
+class PublicDerivedClass : public BaseClass
+{
+
+public:
+    void BaseClassVirtualMethod() override
+    {
+        Util::LOGI("PublicDerivedClass void BaseClassVirtualMethod() override!");
+    }
+    void showBaseClassMember()
+    {
+        // BaseClassPrivatenumber; //error 派生类不能访问基类的private member
+        // 可以访问protected member,而且只能在类内部,public member没有访问限制
+        Util::LOGI("void showBaseClassMember(): BaseClassProtectednumber->%d,BaseClassPublicnumber->%d", BaseClassProtectednumber, BaseClassPublicnumber);
+    }
+};
+
+class ProtectedDerivedClass : protected BaseClass
+{
+};
+
+class PrivateDerivedClass : private BaseClass
+{
+};
+
+void test20230613()
+{
+    BaseClass baseClass;
+    PublicDerivedClass publicDerivedClass;
+    publicDerivedClass.showBaseClassMember();
+    BaseClass *pBaseClass = &publicDerivedClass;
+    pBaseClass->BaseClassVirtualMethod(); // 虽然是BaseClass指针，但是由于多态，BaseClass指针指向的是DerivedClass，所以调用的是DerivedClass重写的方法
+    pBaseClass = &baseClass;
+    pBaseClass->BaseClassVirtualMethod();
+    // 打印信息：
+    // void showBaseClassMember(): BaseClassProtectednumber->1,BaseClassPublicnumber->3
+    // DerivedClass void BaseClassVirtualMethod() override!
+    // virtual void BaseClassVirtualMethod()!
+
+    ProtectedDerivedClass protectedDerivedClass;
+    // protectedDerivedClass.BaseClassPublicnumber; // error protected继承,基类的public member在派生类中变为protected member
+    // pBaseClass = &protectedDerivedClass; // protected继承 不能通过基类指针指向父类,可能因为基类成员最高访问权限是protected
+    PrivateDerivedClass privateDerivedClass;
+    // privateDerivedClass.BaseClassPublicnumber; // error private继承,基类的public,protected member在派生类中变为private member
+    // pBaseClass = &privateDerivedClass; // private继承 不能通过基类指针指向父类,可能因为基类成员最高访问权限是private
+}
+
 void tempTest()
 {
     Util::LOGI("\n\n\n-----------------tempTest:20230314----------------------");
@@ -970,6 +1068,12 @@ void tempTest()
 
     Util::LOGI("\n-----------------tempTest:20230609----------------------");
     test20230609();
+
+    Util::LOGI("\n-----------------tempTest:20230612----------------------");
+    test20230612();
+
+    Util::LOGI("\n-----------------tempTest:20230613----------------------");
+    test20230613();
 }
 
 class SingleTon
