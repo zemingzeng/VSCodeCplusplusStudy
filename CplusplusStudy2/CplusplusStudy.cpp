@@ -939,6 +939,76 @@ void test20230613()
     // pBaseClass = &privateDerivedClass; // private继承 不能通过基类指针指向父类,可能因为基类成员最高访问权限是private
 }
 
+class BaseClass1
+{
+public:
+    BaseClass1()
+    {
+        Util::LOGI("BaseClass1()!");
+    }
+    virtual ~BaseClass1()
+    {
+        Util::LOGI("~BaseClass1()!");
+    }
+};
+class DerivedClass1 : public BaseClass1
+{
+public:
+    DerivedClass1()
+    {
+        Util::LOGI("DerivedClass1()!");
+    }
+    ~DerivedClass1()
+    {
+        Util::LOGI("~DerivedClass1()!");
+    }
+};
+class DerivedClass2 : public DerivedClass1
+{
+public:
+    DerivedClass2()
+    {
+        Util::LOGI("DerivedClass2()!");
+    }
+    ~DerivedClass2()
+    {
+        Util::LOGI("~DerivedClass2()!");
+    }
+};
+void test20230614()
+{
+    PublicDerivedClass publicDerivedClass;
+    BaseClass &rBaseClass = publicDerivedClass;  // 基类引用refer to 派生类
+    BaseClass *pBaseClass = &publicDerivedClass; // 基类指针指向派生类
+    rBaseClass.BaseClassVirtualMethod();         // 和指针一样同样可以产生多态行为
+    pBaseClass->BaseClassVirtualMethod();
+    // 打印信息：
+    // PublicDerivedClass void BaseClassVirtualMethod() override!
+    // PublicDerivedClass void BaseClassVirtualMethod() override!
+
+    BaseClass1 *pBaseClass1 = new DerivedClass1();
+    delete pBaseClass1;
+    // 打印信息（当基类的析构函数不是virtual的时候，可以看到发生多态时派生类的析构没有被调用）：
+    // BaseClass1()!
+    // DerivedClass1()!
+    // ~BaseClass1()!
+    //////////////////////////当一个类可以被继承时应该把析构函数声明成virtual的////////////////
+    // 打印信息（当基类的析构函数是virtual的时候，可以看到发生多态时,派生类的析构就能被调用）：
+    // BaseClass1()!
+    // DerivedClass1()!
+    // ~DerivedClass1()!
+    // ~BaseClass1()!
+    DerivedClass1 *pDerivedClass1 = new DerivedClass2();
+    delete pDerivedClass1;
+    // 打印信息（当基类的析构函数是virtual的时候，其子类的析构函数也是virtual的）：
+    // BaseClass1()!
+    // DerivedClass1()!
+    // DerivedClass2()!
+    // ~DerivedClass2()!
+    // ~DerivedClass1()!
+    // ~BaseClass1()!
+}
+
 void tempTest()
 {
     Util::LOGI("\n\n\n-----------------tempTest:20230314----------------------");
@@ -1074,6 +1144,9 @@ void tempTest()
 
     Util::LOGI("\n-----------------tempTest:20230613----------------------");
     test20230613();
+
+    Util::LOGI("\n-----------------tempTest:20230614----------------------");
+    test20230614();
 }
 
 class SingleTon
