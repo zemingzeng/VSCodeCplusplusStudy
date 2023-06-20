@@ -1009,6 +1009,213 @@ void test20230614()
     // ~BaseClass1()!
 }
 
+class Book
+{
+public:
+    virtual int getPrice()
+    {
+        Util::LOGI("Book virtual int getPrice()!");
+        return 0;
+    }
+};
+class Math : public Book
+{
+public:
+    int getPrice() override
+    {
+        Util::LOGI("Math int getPrice() override!");
+        return 1;
+    }
+};
+
+class Calculus : public Math
+{
+public:
+    void buy()
+    {
+        Util::LOGI("Calculus void buy()!");
+        getPrice();
+    }
+};
+
+void test20230616()
+{
+    Calculus Calculus1;
+    // 如果多重继承，基类有个virtual方法，派生类都实现(除了调用该方法的派生类)，
+    // 如果在派生类中调用该方法，则会从继承关系从下往上找到该方法的实现，而不是直接调用最顶层的基类的方法
+    Calculus1.buy();
+    // 打印信息：
+    // Calculus void buy()!
+    // Math int getPrice() override!
+
+    // Calculus Calculus2=Math();//error no implicit casting
+    Math Math1 = Calculus1; // slicing upcasting
+
+    Book &Book1 = Calculus1;
+}
+
+class Animal
+{
+public:
+    Animal()
+    {
+        Util::LOGI("Animal()!");
+    }
+    Animal(const Animal &)
+    {
+        Util::LOGI("Animal(const Animal&)!");
+    }
+    string getName()
+    {
+        Util::LOGI("Animal string getName()!");
+        return "Animal";
+    }
+};
+
+class Cat : virtual public Animal
+{
+public:
+    Cat()
+    {
+        Util::LOGI("Cat()!");
+    }
+    void eat()
+    {
+        Util::LOGI("Cat void eat()!");
+    }
+    // string getName()
+    // {
+    //     Util::LOGI("Cat string getName()!");
+    //     return "Cat";
+    // }
+};
+class Dog : virtual public Animal
+{
+public:
+    Dog()
+    {
+        Util::LOGI("Dog()!");
+    }
+    void eat()
+    {
+        Util::LOGI("Dog void eat()!");
+    }
+};
+class DogCat : public Cat, public Dog
+{
+public:
+    DogCat()
+    {
+        Util::LOGI("DogCat()!");
+    }
+    // using Cat::eat; // using Cat::eat version
+    using Dog::eat; // avoid ambigous when invoke DogCat1.eat(). using Dog::eat version
+    void eat1()
+    {
+        eat();      // ambigous when without using 'BaseClass'::eat
+        Dog::eat(); // using Dog::eat version
+        Cat::eat(); // using Cat::eat version
+        // Dog::getName();
+        // InsightC++ 对应上面4个方法:
+        // /* static_cast<Dog *>(this)-> */ eat();
+        // /* static_cast<Dog *>(this)-> */ eat();
+        // /* static_cast<Cat *>(this)-> */ eat();
+        // /* static_cast<Animal *>(static_cast<Dog *>(this))-> */ getName();
+    }
+};
+
+void test20230619()
+{
+    // Animal Animal1 = Animal(); // 构造函数
+    // DogCat DogCat1;
+    // DogCat1.Cat::eat(); // 居然还可以这样调用方法
+
+    // 2 ways to avoid ambigous when two base class both has same method :
+    // using XXX::xx or 直接在调用XXX::xx
+    DogCat DogCat1;
+    DogCat1.eat();
+    DogCat1.eat1();
+    // 打印信息：
+    // Animal()!
+    // Cat()!
+    // Animal()!
+    // Dog()!
+    // DogCat()!
+    // Dog void eat()!
+    // Dog void eat()!
+    // Dog void eat()!
+    // Cat void eat()!
+
+    DogCat DogCat3; // 菱形继承会实例化两个基类
+    // error：菱形继承会实例化两个基类所以会产生 ambigous for base class Animal,即使using Dog::getName也同样ambigous，
+    // 因为Dog没有getName方法定义也是派生来的,所以他会static_cast<Animal *>(this)->getName()(根据c++ insight);
+    // 但是内存模型中有两个Animal的实例,编译器不知道调用哪个Animal的方法
+    // getName();
+    // 打印信息：
+    // Animal()!
+    // Cat()!
+    // Animal()!
+    // Dog()!
+    // DogCat()!
+
+    // 1.可以使用虚拟继承来解决此问题，2.当然也可以把方法声明成纯虚函数，即基类是抽象类不能被实例化
+    // DogCat3.Animal::getName();
+    Dog Dog1;
+    Dog1.getName();
+    DogCat3.getName();
+    // 打印信息：
+    //  Animal string getName()!
+    //  Animal string getName()!
+}
+
+class Tree
+{
+public:
+    Tree() = default;
+    Tree(bool canWhat)
+    {
+        Util::LOGI("Tree(bool canWhat)!");
+    }
+    virtual void getHeight(bool)
+    {
+        Util::LOGI("Tree virtual void getHeight(bool)!");
+    }
+    void getHeight()
+    {
+        Util::LOGI("Tree void getHeight()!");
+    }
+};
+class CherryTree : public Tree
+{
+public:
+    using Tree::getHeight;
+    CherryTree(bool)
+    {
+        Util::LOGI("CherryTree(bool)!");
+    }
+    void getHeight(bool) override
+    {
+        Util::LOGI("CherryTree void getHeight(bool) override!");
+    }
+};
+void test20230620()
+{
+    CherryTree CherryTree1(true);
+
+    CherryTree1.getHeight(false);
+    // error: 当从基类override或者overload某个方法，此时基类的同名方法都会被hide,
+    // 无论给什么参数都会走派生类的override或者overload的方法,除非使用using或者override或者overload所有其他参数版本的此方法
+    // CherryTree1.getHeight();
+    Tree &rTree = CherryTree1;
+    rTree.getHeight(true);
+    rTree.getHeight(); // 通过基类引用可以正确调用次方法
+    // 打印信息：
+    // CherryTree(bool)!
+    // CherryTree void getHeight(bool) override!
+    // CherryTree void getHeight(bool) override!
+    // Tree void getHeight()!
+}
+
 void tempTest()
 {
     Util::LOGI("\n\n\n-----------------tempTest:20230314----------------------");
@@ -1147,6 +1354,15 @@ void tempTest()
 
     Util::LOGI("\n-----------------tempTest:20230614----------------------");
     test20230614();
+
+    Util::LOGI("\n-----------------tempTest:20230616----------------------");
+    test20230616();
+
+    Util::LOGI("\n-----------------tempTest:20230619----------------------");
+    test20230619();
+
+    Util::LOGI("\n-----------------tempTest:20230620----------------------");
+    test20230620();
 }
 
 class SingleTon
