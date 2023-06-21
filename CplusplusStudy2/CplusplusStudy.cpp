@@ -1216,6 +1216,109 @@ void test20230620()
     // Tree void getHeight()!
 }
 
+class Computer
+{
+public:
+    int price;
+    virtual void playGame(int hours = 2) const
+    {
+        Util::LOGI("Computer virtual void playGame(int hours = 2) const! param hours->%d", hours);
+    }
+    virtual void listenMusic()
+    {
+        Util::LOGI("Computer virtual void listenMusic()!");
+    }
+    virtual void netChat()
+    {
+        Util::LOGI("Computer virtual void netChat()!");
+    }
+
+protected:
+    void programming()
+    {
+        Util::LOGI("Computer protected void programming()!");
+    }
+};
+class NoteBook : public Computer
+{
+public:
+    using Computer::programming;
+    // 基类virtual方法为public,private..,派生类为private,public..都视为override,
+    // 但是如果基类为const，则派生类必须为const,否则视为overload
+    void playGame(int hours = 4) const override
+    {
+        Util::LOGI("NoteBook void playGame(int hours = 4) const override! param hours->%d", hours);
+    }
+
+protected:
+    void listenMusic() override
+    {
+        Util::LOGI("NoteBook protected void listenMusic() override!");
+    }
+
+private:
+    void netChat() override
+    {
+        Util::LOGI("NoteBook private void netChat() override!");
+    }
+
+public:
+    void callAnotherPrivateProtectedMethod(NoteBook &NoteBook1)
+    {
+        Util::LOGI("void callAnotherPrivateNetChat(NoteBook& NoteBook1)!");
+        NoteBook1.netChat();
+        NoteBook1.listenMusic();
+    }
+    friend void callAnother(NoteBook &NoteBook1);
+};
+void callAnother(NoteBook &NoteBook1)
+{
+    NoteBook1.netChat();     // private
+    NoteBook1.listenMusic(); // protected
+}
+void test20230621()
+{
+    Computer Computer1;
+    NoteBook NoteBook1;
+    Computer &rComputer = NoteBook1;
+    Computer *pComputer = &NoteBook1;
+    Computer1.playGame();
+    NoteBook1.playGame();
+    rComputer.playGame();
+    pComputer->playGame();
+    // 打印信息：当基类引用或者指针调用有默认参数的方法时，如果指向派生类，则调用的是派生类的方法，但是参数默认值是基类的
+    // Computer virtual void playGame(int hours = 2) const! param hours->2
+    // NoteBook void playGame(int hours = 4) const override! param hours->4
+    // NoteBook void playGame(int hours = 4) const override! param hours->2
+    // NoteBook void playGame(int hours = 4) const override! param hours->2
+
+    // NoteBook1.listenMusic(); // error can not access protected method!!
+    pComputer->listenMusic();
+    pComputer->netChat();
+    rComputer.listenMusic();
+    rComputer.netChat();
+    // 打印信息: 虽然基类public virtual方法被派生类重写时,改成protected或者private,但是基类指针和引用当指向派生类时，也能调用派生类此重写方法
+    // NoteBook protected void listenMusic() override!
+    // NoteBook private void netChat() override!
+    // NoteBook protected void listenMusic() override!
+    // NoteBook private void netChat() override!
+
+    NoteBook1.programming(); // 通过public using BaseClass::xx,可改变派生类中继承自基类protected方法，改变为public
+
+    NoteBook NoteBook2;
+    NoteBook NoteBook3;
+    NoteBook3.callAnotherPrivateProtectedMethod(NoteBook2);
+    // 打印信息：在类方法成员中另一个实例化的对象也可以调用private protected成员,相当于同类的方法互为friend方法
+    // void callAnotherPrivateNetChat(NoteBook& NoteBook1)!
+    // NoteBook private void netChat() override!
+    // NoteBook protected void listenMusic() override!
+
+    callAnother(NoteBook3);
+    // 打印信息：
+    // NoteBook private void netChat() override!
+    // NoteBook protected void listenMusic() override!
+}
+
 void tempTest()
 {
     Util::LOGI("\n\n\n-----------------tempTest:20230314----------------------");
@@ -1363,6 +1466,9 @@ void tempTest()
 
     Util::LOGI("\n-----------------tempTest:20230620----------------------");
     test20230620();
+
+    Util::LOGI("\n-----------------tempTest:20230621----------------------");
+    test20230621();
 }
 
 class SingleTon
