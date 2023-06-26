@@ -1319,6 +1319,123 @@ void test20230621()
     // NoteBook protected void listenMusic() override!
 }
 
+class Phone
+{
+public:
+    virtual void call()
+    {
+        Util::LOGI("Phone virtual void call()");
+    }
+};
+class XiaoMi : public Phone
+{
+};
+
+void test20230625()
+{
+    XiaoMi XiaoMi1;
+    Phone &Phone1 = XiaoMi1;
+    Util::LOGI("typeid(Phone1)->%s,typeid(XiaoMi)->%s", typeid(Phone1).name(), typeid(XiaoMi).name());
+    if (typeid(Phone1) == typeid(XiaoMi))
+    {
+        Util::LOGI("typeid(Phone1) == typeid(XiaoMi) is true!");
+    }
+    // typeid用来判断对象类型，如果是多态类型，基类至少有一个virtual方法，typeid返回的则是动态类型类型信息.
+    // 需要的头文件是<typeinfo>
+    // 打印信息：
+    // typeid(Phone1)->6XiaoMi,typeid(XiaoMi)->6XiaoMi
+    // typeid(Phone1) == typeid(XiaoMi) is true!
+}
+
+class Car
+{
+};
+class AirPlane
+{
+};
+class SUVCar : public Car
+{
+public:
+    using PMethod = void (*)();
+    SUVCar() = default;
+    SUVCar(SUVCar &&)
+    {
+        Util::LOGI("SUVCar(SUVCar &&)!");
+    }
+    SUVCar(const SUVCar &)
+    {
+        Util::LOGI("SUVCar(const SUVCar&)!");
+    }
+
+    static void method()
+    {
+        Util::LOGI("void method()!");
+    }
+    operator PMethod()
+    {
+        Util::LOGI("operator PMethod()!");
+        return method;
+    }
+    SUVCar &operator=(const SUVCar &) = default;
+};
+void test20230626()
+{
+    SUVCar SUVCar1;
+    SUVCar SUVCar2 = SUVCar1;            // copy constructor
+    SUVCar SUVCar3 = std::move(SUVCar1); // move constructor
+    // 信息打印：
+    // SUVCar(const SUVCar&)!
+    // SUVCar(SUVCar &&)!
+
+    const string &rStr = "12344444444";
+    string &rStr1 = const_cast<string &>(rStr);
+    Util::LOGI("before const string &rStr-->%s,string &rStr1-->%s", rStr.c_str(), rStr1.c_str());
+    rStr1 = "3333333333333333";
+    Util::LOGI("after const string &rStr-->%s,string &rStr1-->%s", rStr.c_str(), rStr1.c_str());
+    // 打印信息：//const_cast；1.只能用于指针或者引用 2.不能转换为其他类型，只是去掉const限定符
+    // before const string &rStr-->12344444444,string &rStr1-->12344444444
+    // after const string &rStr-->3333333333333333,string &rStr1-->3333333333333333
+
+    SUVCar::PMethod PMethod1 = SUVCar3; // 调用类型转换函数
+    PMethod1();
+    // 打印信息：
+    // operator PMethod()!
+    // void method()!
+
+    int intNumber = 0;
+    // static_cast使用基本等价于隐式转换
+    // 用于低风险的转换,一般只要编译器能自己进行隐式转换的都是低风险转换，一般平等转换和提升转换都是低风险的转换
+    // 等价于double doubleNumber =static_cast<double>(intNumber)(c++insight中也是这样展开的);
+    double doubleNumber = intNumber;
+    // 可用于派生类指针转换成基类指针，基类指针转化成子类指针
+    // 下面均编译ok
+    SUVCar *pSUVCar = nullptr;
+    Car *pCar = nullptr;
+    pSUVCar = static_cast<SUVCar *>(pCar);
+    SUVCar *pSUVCar1 = nullptr;
+    pCar = static_cast<Car *>(pSUVCar1);
+    SUVCar SUVCar4;
+    Car Car1;
+    SUVCar &rSUVCar = SUVCar4;
+    Car &rCar = Car1;
+    rSUVCar = static_cast<SUVCar &>(rCar);
+    SUVCar &rSUVCar1 = SUVCar4;
+    rCar = static_cast<Car &>(rSUVCar1);
+    Car1 = static_cast<Car>(SUVCar4); // ok
+    // SUVCar4 = static_cast<SUVCar>(Car1); // error
+    // Car1 = reinterpret_cast<Car>(SUVCar4); // error
+
+    // 强制转换，不同类型，引用的指针转换，指针和long long之类的转换,不能不同对象之前的转换
+    Car *Car2 = nullptr;
+    AirPlane *AirPlane1 = nullptr;
+    Car2 = reinterpret_cast<Car *>(AirPlane1);
+    Car *Car3 = nullptr;
+    AirPlane1 = reinterpret_cast<AirPlane *>(Car3);
+    Util::LOGI("long size->%d,int size->%d,long int size->%d,long long size->%d", sizeof(long), sizeof(int), sizeof(long int), sizeof(long long));
+    // 打印信息:
+    // long size->4,int size->4,long int size->4,long long size->8
+    long long intCar = reinterpret_cast<long long>(Car3);
+}
 void tempTest()
 {
     Util::LOGI("\n\n\n-----------------tempTest:20230314----------------------");
@@ -1469,6 +1586,12 @@ void tempTest()
 
     Util::LOGI("\n-----------------tempTest:20230621----------------------");
     test20230621();
+
+    Util::LOGI("\n-----------------tempTest:20230625----------------------");
+    test20230625();
+
+    Util::LOGI("\n-----------------tempTest:20230626----------------------");
+    test20230626();
 }
 
 class SingleTon
