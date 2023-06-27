@@ -1436,6 +1436,26 @@ void test20230626()
     // long size->4,int size->4,long int size->4,long long size->8
     long long intCar = reinterpret_cast<long long>(Car3);
 }
+
+void externalMethod(); // external link
+// multiple definition of `externalMethod()'
+//  void externalMethod(){
+//      Util::LOGI("CplusplusStudy.cpp void externalMethod()!");
+//  }
+void staticExternalMethod(); // static method is internal link only same source file can access it
+void anonymousNameSpaceMethod();
+void test20230627()
+{
+    externalMethod();
+    // 打印信息：// 全局方法若只有声明没有定义，则是外部链接，即在其他文件中找实现
+    //  External.cpp void externalMethod()!
+
+    // external static method is internal link only same source file can access it
+    // staticExternalMethod(); //error
+
+    // error anonymous NameSpace下的external method is also internal link the same as external static method
+    // anonymousNameSpaceMethod(); //error internal link can not access it in different file
+}
 void tempTest()
 {
     Util::LOGI("\n\n\n-----------------tempTest:20230314----------------------");
@@ -1592,6 +1612,9 @@ void tempTest()
 
     Util::LOGI("\n-----------------tempTest:20230626----------------------");
     test20230626();
+
+    Util::LOGI("\n-----------------tempTest:20230627----------------------");
+    test20230627();
 }
 
 class SingleTon
