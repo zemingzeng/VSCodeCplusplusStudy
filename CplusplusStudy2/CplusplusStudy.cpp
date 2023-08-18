@@ -1456,6 +1456,111 @@ void test20230627()
     // error anonymous NameSpace下的external method is also internal link the same as external static method
     // anonymousNameSpaceMethod(); //error internal link can not access it in different file
 }
+
+class Haval
+{
+public:
+    void traval()
+    {
+        static int day = 1;
+        Util::LOGI("My Haval go to traval %d days!", day);
+        ++day;
+    }
+};
+void test20230628()
+{
+    extern int externalNumber;
+    Util::LOGI("extern externalNumber form External.cpp -->%d", externalNumber);
+
+    Haval Haval1;
+    for (int i = 0; i < 5; i++)
+    {
+        Haval1.traval();
+    }
+    // 打印信息：//方法内部的静态变量,在方法结束后不会被销毁,且只能在此方法中使用
+    //  My Haval go to traval 1 days!
+    //  My Haval go to traval 2 days!
+    //  My Haval go to traval 3 days!
+    //  My Haval go to traval 4 days!
+    //  My Haval go to traval 5 days!
+}
+
+template <typename H>
+class HavalH9
+{
+public:
+    int getPrice();
+};
+template <typename H> // 必须这样定义..
+int HavalH9<H>::getPrice()
+{
+    return 250000;
+}
+void test20230629()
+{
+    HavalH9<Haval> HavalH9_Int1;
+    Util::LOGI("HavalH9_Int1 getPrice()-->%d RMB..", HavalH9_Int1.getPrice());
+}
+
+class OnePlus
+{
+public:
+};
+void test20230630()
+{
+}
+
+void test20230726()
+{
+    std::vector<unsigned char> buf(sizeof(void *));
+    for (int i = 0; i < sizeof(void *); i++)
+    {
+        Util::LOGI("buf[%d]--->%#x", i, buf[i]);
+        Util::LOGI("&buf[%d]--->%#x", i, &buf[i]);
+    }
+    int number = 911;
+    Util::LOGI("===========================");
+    Util::LOGI("&number--->%p", &number);
+    Util::LOGI("sizeof(char)--->%d", sizeof(char));
+    Util::LOGI("sizeof(buf)--->%d", sizeof(buf));
+    Util::LOGI("sizeof(void *)--->%d", sizeof(void *));
+    Util::LOGI("sizeof(void **)--->%d", sizeof(void **));
+    Util::LOGI("===========================");
+    *(void **)&buf[0] = &number;
+    for (int i = 0; i < sizeof(void *); i++)
+    {
+        printf("buf[%d]--->%p\n", i, (buf[i]));
+        printf("buf[%d]--->%d\n", i, (buf[i]));
+    }
+    Util::LOGI("**(int**)&buf[0]--->%d", **(int **)&buf[0]);
+    Util::LOGI("*(int**)&buf[0]--->%p", *(int **)&buf[0]);
+    Util::LOGI("(int**)&buf[0]--->%p", (int **)&buf[0]);
+    Util::LOGI("(int*)&buf[0]--->%p", (int *)&buf[0]);
+}
+
+class Audio
+{
+public:
+    static void static_test() {}
+    void test() {}
+};
+void methodTest(void (*p)()) {}
+void methodTest1(void *p[]) {}
+void test20230815()
+{
+    methodTest(Audio::static_test);
+    methodTest(test20230815);
+    //  methodTest(Audio::test);
+    int numberArray[5]={0};
+    int numberArray1[5]={0};
+    Util::LOGI("numberArray->%p,numberArray+1->%p",numberArray,numberArray+1);
+    //numberArray = numberArray1; //error invalid array assignment
+    void* numberArrayP[4]={nullptr};
+    methodTest1(numberArrayP);
+    int (*pNumberArray)[] = &numberArray;//数组指针，编译器把数组取地址当作为数组指针，不是双重指针
+    //int** pNumber = &numberArray;//error 编译器把数组取地址当作为数组指针，不是双重指针
+}
+
 void tempTest()
 {
     Util::LOGI("\n\n\n-----------------tempTest:20230314----------------------");
@@ -1615,6 +1720,21 @@ void tempTest()
 
     Util::LOGI("\n-----------------tempTest:20230627----------------------");
     test20230627();
+
+    Util::LOGI("\n-----------------tempTest:20230628----------------------");
+    test20230628();
+
+    Util::LOGI("\n-----------------tempTest:20230629----------------------");
+    test20230629();
+
+    Util::LOGI("\n-----------------tempTest:20230630----------------------");
+    test20230630();
+
+    Util::LOGI("\n-----------------tempTest:20230726----------------------");
+    test20230726();
+
+    Util::LOGI("\n-----------------tempTest:20230815----------------------");
+    test20230815();
 }
 
 class SingleTon
