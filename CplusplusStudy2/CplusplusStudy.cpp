@@ -1551,14 +1551,58 @@ void test20230815()
     methodTest(Audio::static_test);
     methodTest(test20230815);
     //  methodTest(Audio::test);
-    int numberArray[5]={0};
-    int numberArray1[5]={0};
-    Util::LOGI("numberArray->%p,numberArray+1->%p",numberArray,numberArray+1);
-    //numberArray = numberArray1; //error invalid array assignment
-    void* numberArrayP[4]={nullptr};
+    int numberArray[5] = {0};
+    int numberArray1[5] = {0};
+    Util::LOGI("numberArray->%p,numberArray+1->%p", numberArray, numberArray + 1);
+    // numberArray = numberArray1; //error invalid array assignment
+    void *numberArrayP[4] = {nullptr};
     methodTest1(numberArrayP);
-    int (*pNumberArray)[] = &numberArray;//数组指针，编译器把数组取地址当作为数组指针，不是双重指针
-    //int** pNumber = &numberArray;//error 编译器把数组取地址当作为数组指针，不是双重指针
+    int(*pNumberArray)[] = &numberArray; // 数组指针，编译器把数组取地址当作为数组指针，不是双重指针
+    // int** pNumber = &numberArray;//error 编译器把数组取地址当作为数组指针，不是双重指针
+}
+
+namespace ming
+{
+    class Phone_
+    {
+    public:
+        void printName()
+        {
+            Util::LOGI("my name is Phone!!");
+        }
+        virtual ~Phone_(){}
+    };
+
+} // namespace ming
+namespace ming1
+{
+    namespace ming2
+    {
+        using namespace ming;
+        class iPhone : public ming::Phone_
+        {
+        public:
+            void printName()
+            {
+                Util::LOGI("my name is iPhone!!");
+            }
+        };
+    }
+
+} // namespace ming
+void test20230824()
+{
+    //子空间可以直接访问父空间的东西，不需要加上限定符
+    ming::Phone_* phone = new ming1::ming2::iPhone();
+    phone->printName();
+    delete phone;
+    ming1::ming2::Phone_* phone1 = new ming1::ming2::iPhone();//using namespace可以导入当前namespace中
+                                                              //所以可以使用当前空间限定符访问此变量
+    phone1->printName();
+    delete phone1;
+    //打印信息：
+    //my name is Phone!!
+    //my name is Phone!!
 }
 
 void tempTest()
@@ -1735,6 +1779,9 @@ void tempTest()
 
     Util::LOGI("\n-----------------tempTest:20230815----------------------");
     test20230815();
+
+    Util::LOGI("\n-----------------tempTest:20230824----------------------");
+    test20230824();
 }
 
 class SingleTon
