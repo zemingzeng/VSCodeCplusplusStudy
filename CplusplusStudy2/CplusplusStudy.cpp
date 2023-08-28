@@ -1570,7 +1570,7 @@ namespace ming
         {
             Util::LOGI("my name is Phone!!");
         }
-        virtual ~Phone_(){}
+        virtual ~Phone_() {}
     };
 
 } // namespace ming
@@ -1592,17 +1592,44 @@ namespace ming1
 } // namespace ming
 void test20230824()
 {
-    //子空间可以直接访问父空间的东西，不需要加上限定符
-    ming::Phone_* phone = new ming1::ming2::iPhone();
+    // 子空间可以直接访问父空间的东西，不需要加上限定符
+    ming::Phone_ *phone = new ming1::ming2::iPhone();
     phone->printName();
     delete phone;
-    ming1::ming2::Phone_* phone1 = new ming1::ming2::iPhone();//using namespace可以导入当前namespace中
-                                                              //所以可以使用当前空间限定符访问此变量
+    ming1::ming2::Phone_ *phone1 = new ming1::ming2::iPhone(); // using namespace可以导入当前namespace中
+                                                               // 所以可以使用当前空间限定符访问此变量
     phone1->printName();
     delete phone1;
-    //打印信息：
-    //my name is Phone!!
-    //my name is Phone!!
+    // 打印信息：
+    // my name is Phone!!
+    // my name is Phone!!
+}
+
+class Tank300
+{
+public:
+    // forbids in-class initialization of non-const static member
+    // static int staticNumber = 0;
+    static int staticNumber;
+    const static int staticNumber1 = 0;
+    const int constNumber1 = 90;
+    // 静态成员必须在类中初始化，直接初始化，在构造中初始化
+    const int constNumber2;
+    //const int constNumber3;
+
+    Tank300() : constNumber2(100)/*, constNumber3(1)*/{
+        //
+    };
+    void setConstNumber()
+    {
+        // constNumber3 = 10; //error
+    }
+};
+int Tank300::staticNumber = 99;
+void test20230828()
+{
+    Tank300 tank300;
+    tank300.staticNumber++;
 }
 
 void tempTest()
@@ -1782,6 +1809,9 @@ void tempTest()
 
     Util::LOGI("\n-----------------tempTest:20230824----------------------");
     test20230824();
+
+    Util::LOGI("\n-----------------tempTest:20230828----------------------");
+    test20230828();
 }
 
 class SingleTon
