@@ -630,6 +630,9 @@ public:
 
 void test20230606()
 {
+    MutableStudy mutableStudy;
+    mutableStudy.modify();
+
     RefMethod refMethod;
     refMethod.nonTempGetInt();
     // refMethod.tempGetInt(); error
@@ -1607,7 +1610,7 @@ void test20230824()
 
 class Tank300
 {
-public:
+private:
     // forbids in-class initialization of non-const static member
     // static int staticNumber = 0;
     static int staticNumber;
@@ -1615,23 +1618,86 @@ public:
     const int constNumber1 = 90;
     // 静态成员必须在类中初始化，直接初始化，在构造中初始化
     const int constNumber2;
-    //const int constNumber3;
-
-    Tank300() : constNumber2(100)/*, constNumber3(1)*/{
-        //
-    };
+    //'constexpr' needed for in-class initialization of static data member
+    // const static float constFloat = 1.0f;
     void setConstNumber()
     {
         // constNumber3 = 10; //error
+    }
+
+public:
+    Tank300() : constNumber2(100) /*, constNumber3(1)*/ {
+
+                    //
+                };
+    void show()
+    {
+        Util::LOGI("staticNumber->%d,staticNumber1->%d,constNumber1->%d,constNumber2->%d,constFloat->%f",
+                   staticNumber, staticNumber1, constNumber1, constNumber2
+                   /*,constFloat*/);
     }
 };
 int Tank300::staticNumber = 99;
 void test20230828()
 {
     Tank300 tank300;
-    tank300.staticNumber++;
+    tank300.show();
 }
 
+void convert2deinterleave(const void *src, void **dst, size_t frames, size_t channelCount, size_t sampleSize)
+{
+    size_t frameSize = channelCount * sampleSize;
+
+    for (unsigned i = 0; i < channelCount; i++)
+    {
+        const uint8_t *start = static_cast<const uint8_t *>(src) + channelCount * sampleSize;
+
+        for (unsigned j = 0; j < frames; j++)
+        {
+            memcpy(static_cast<uint8_t *>(dst[i]) + j * sampleSize, start + frameSize, sampleSize);
+        }
+    }
+};
+class CarKeMu1
+{
+public:
+    int score;
+    int time = 0;
+    int place = 11;
+    CarKeMu1 *pCar;
+    CarKeMu1() : score(this->place), pCar(this)
+    {
+        Util::LOGI("CarKeMu1 score->%d", score);
+        Util::LOGI("CarKeMu1 place->%d", place);
+        Util::LOGI("CarKeMu1 pCar place->%d", pCar->place);
+        Util::LOGI("CarKeMu1 pCar->%p,this->%p", pCar, this);
+    }
+};
+void test20230901()
+{
+    // convert2deinterleave
+    CarKeMu1 carKeMu1;
+}
+
+void simpleTest()
+{
+    Util::LOGI("simpleTest-simpleTest-simpleTest-simpleTest-simpleTest...........begin");
+    int *nullptrInt = nullptr;
+    delete nullptrInt;
+    vector<unsigned char> messages;
+    // messages.push_back(0x1);
+    messages.push_back('x');
+    messages.push_back(0x0);
+    messages.push_back('x');
+    // messages.push_back(0x0);
+    // messages.push_back(0x62);
+    // messages.push_back(0x0);
+    // messages.push_back(0x0);
+    messages.push_back('\0');
+    Util::LOGI("messages->%s", &messages[0]);
+
+    Util::LOGI("simpleTest-simpleTest-simpleTest-simpleTest-simpleTest...........end");
+}
 void tempTest()
 {
     Util::LOGI("\n\n\n-----------------tempTest:20230314----------------------");
@@ -1749,8 +1815,6 @@ void tempTest()
     Util::LOGI("after exchange:number4->%d,number5->%d,return value->%d", number4, number5, number6);
 
     Util::LOGI("\n-----------------tempTest:20230606----------------------");
-    MutableStudy mutableStudy;
-    mutableStudy.modify();
     test20230606();
 
     Util::LOGI("\n-----------------tempTest:20230607----------------------");
@@ -1812,6 +1876,11 @@ void tempTest()
 
     Util::LOGI("\n-----------------tempTest:20230828----------------------");
     test20230828();
+
+    Util::LOGI("\n-----------------tempTest:20230901----------------------");
+    test20230901();
+
+    simpleTest();
 }
 
 class SingleTon
@@ -1826,7 +1895,7 @@ public:
     }
 };
 
-#define SingleInstace SingleTon::instance;
+#define SingleInstace SingleTon::instance
 
 void func3()
 {
