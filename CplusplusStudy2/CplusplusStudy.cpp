@@ -562,11 +562,11 @@ void iamFriendMethod(const Watermelon &watermelon)
 
 void test20230605()
 {
-    Pear A, B;
-    Pear &&C = Pear{};
-    A = C;                      // 调用copy函数
-    B = Pear{};                 // 如果有move assignment operator函数就调用move函数，如果没有就调用copy assignment operator函数
-    Pear D = std::move(Pear{}); // 如果有move函数，则调用move构造函数，如果没得即调用copy构造函数
+    Pear A{11}, B{22};
+    Pear &&C = Pear{1};
+    A = C;                       // 调用copy函数
+    B = Pear{2};                 // 如果有move assignment operator函数就调用move函数，如果没有就调用copy assignment operator函数
+    Pear D = std::move(Pear{3}); // 如果有move函数，则调用move构造函数，如果没得即调用copy构造函数
 }
 
 void func4(int &&);
@@ -576,8 +576,11 @@ class Me
 {
 public:
     Pear pear;
-    Me() : pear{Pear(5)}
+    Pear pear1{44};
+    int age;
+    Me() : pear{Pear(5)}, age(4) // 或者age{4}都是ok的
     {
+        Util::LOGI("Me age-->%d", age);
         Pear pear1 = Pear{3};
         pear = pear1;   // 调用的copy assignment operator
         pear = Pear{3}; // 调用的是move assignment operator不是copy assignment operator,
@@ -1679,9 +1682,48 @@ void test20230901()
     CarKeMu1 carKeMu1;
 }
 
+class Run
+{
+public:
+    int getNumber()
+    {
+        Util::LOGI("Run : int getNumber()!");
+        return 9;
+    }
+    int getNumber() const
+    {
+        Util::LOGI("Run : int getNumber() const !");
+        return 5;
+    }
+    // 无法重载仅按返回类型区分的函数:
+    //  const int getNumber(){
+    //      return 4;
+    //  }
+    int getNumber(int) const
+    {
+        Util::LOGI("Run : int getNumber(int) const !");
+        return 0;
+    }
+};
+void test20231002()
+{
+    Run run;
+    run.getNumber();
+    // 打印信息：
+    // Run : int getNumber()!
+    const Run run1;
+    run1.getNumber();
+    // 打印信息：
+    // Run : int getNumber() const !
+    run.getNumber(0); // 但是非常量对象是可以调用常量函数的
+    // 打印信息：
+    // Run : int getNumber(int) const !
+}
+
 void simpleTest()
 {
     Util::LOGI("simpleTest-simpleTest-simpleTest-simpleTest-simpleTest...........begin");
+
     int *nullptrInt = nullptr;
     delete nullptrInt;
     vector<unsigned char> messages;
@@ -1696,8 +1738,25 @@ void simpleTest()
     messages.push_back('\0');
     Util::LOGI("messages->%s", &messages[0]);
 
+    std::vector<Run> vec(2);
+    Run run1;
+    Run run2;
+    vec.push_back(run1);
+    vec.push_back(run2);
+    vec.at(0);
+    vec.at(1);
+    Util::LOGI("Vector resize before : vec.at(0)->%p,vec.at(1)->%p", &vec.at(0), &vec.at(1));
+    Run &rRun1 = vec.at(0);
+    rRun1.getNumber();
+    Util::LOGI("Vector resize before : Run &rRun1->%p", &rRun1);
+    vec.resize(12);
+    Util::LOGI("Vector resize after : vec.at(0)->%p,vec.at(1)->%p", &vec.at(0), &vec.at(1));
+    rRun1.getNumber();
+    Util::LOGI("Vector resize after : Run &rRun1->%p", &rRun1);
+
     Util::LOGI("simpleTest-simpleTest-simpleTest-simpleTest-simpleTest...........end");
 }
+
 void tempTest()
 {
     Util::LOGI("\n\n\n-----------------tempTest:20230314----------------------");
@@ -1809,6 +1868,7 @@ void tempTest()
     Util::LOGI("\n-----------------tempTest:20230602----------------------");
 
     Util::LOGI("\n-----------------tempTest:20230605----------------------");
+    test20230605();
     int number4 = 8, number5 = 9;
     Util::LOGI("before exchange:number4->%d,number5->%d", number4, number5);
     int number6 = exchange(number4, number5); // 这个函数可以帮助更好实现move函数。
@@ -1879,6 +1939,9 @@ void tempTest()
 
     Util::LOGI("\n-----------------tempTest:20230901----------------------");
     test20230901();
+
+    Util::LOGI("\n-----------------tempTest:20231002----------------------");
+    test20231002();
 
     simpleTest();
 }
