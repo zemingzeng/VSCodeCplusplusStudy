@@ -498,9 +498,9 @@ public:
     {
         Util::LOGI("Pear(const Pear &)!");
     }
-    Pear(Pear &&) // move constructor
+    Pear(Pear &&pear) : price(998) // move constructor
     {
-        Util::LOGI("Pear(Pear&&)!");
+        Util::LOGI("Pear(Pear&&)! src price->%d", pear.price);
     }
     Pear &operator=(Pear &&src) // move assignment operator > copy assignment operator
     {
@@ -566,6 +566,7 @@ void test20230605()
     Pear &&C = Pear{1};
     A = C;                       // 调用copy函数
     B = Pear{2};                 // 如果有move assignment operator函数就调用move函数，如果没有就调用copy assignment operator函数
+                                 // Pear{2}是一个临时值所以可被当作为右值引用
     Pear D = std::move(Pear{3}); // 如果有move函数，则调用move构造函数，如果没得即调用copy构造函数
 }
 
@@ -1704,6 +1705,15 @@ public:
         Util::LOGI("Run : int getNumber(int) const !");
         return 0;
     }
+    Run(const Run &)
+    {
+        Util::LOGI("Run : Run(const Run&)!");
+    }
+    Run(Run &&)
+    {
+        Util::LOGI("Run : Run( Run&&)!");
+    }
+    Run() {}
 };
 void test20231002()
 {
@@ -1720,6 +1730,7 @@ void test20231002()
     // Run : int getNumber(int) const !
 }
 
+#include <algorithm>
 void simpleTest()
 {
     Util::LOGI("simpleTest-simpleTest-simpleTest-simpleTest-simpleTest...........begin");
@@ -1753,6 +1764,28 @@ void simpleTest()
     Util::LOGI("Vector resize after : vec.at(0)->%p,vec.at(1)->%p", &vec.at(0), &vec.at(1));
     rRun1.getNumber();
     Util::LOGI("Vector resize after : Run &rRun1->%p", &rRun1);
+
+    int number1{2}, number2{3};
+    int *pNumber1 = &number1;
+    int *pNumber2 = &number2;
+    std::swap(pNumber1, pNumber2);
+    Pear pear1{222}, pear2{333};
+    std::swap(pear1, pear2);
+
+    Pear pear3{45};
+    const Pear &rPear3 = pear3;
+    Pear pear4{rPear3}; // 调用拷贝构造
+    // Pear pear4{pear3};
+    Util::LOGI("Pear(static_cast<const Pear &&>(std::move(Pear{456}))).....");
+    Pear(static_cast<const Pear &&>(std::move(Pear{456})));
+    const int number3 = 9;
+    const int &rNumber3 = number3;
+
+    Run run3;
+    auto uPtr = std::make_unique<Run>(run3);
+    auto uPtr1 = std::make_unique<Run>(run3);
+    Util::LOGI("uPtr-->%p,uPtr1-->%p", uPtr.get(), uPtr1.get());
+    auto sPtr = std::make_shared<Run>(run3);
 
     Util::LOGI("simpleTest-simpleTest-simpleTest-simpleTest-simpleTest...........end");
 }
