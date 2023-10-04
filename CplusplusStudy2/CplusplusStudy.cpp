@@ -1713,7 +1713,14 @@ public:
     {
         Util::LOGI("Run : Run( Run&&)!");
     }
-    Run() {}
+    Run()
+    {
+        Util::LOGI("Run : Run()!");
+    }
+    ~Run()
+    {
+        Util::LOGI("Run : ~Run()!");
+    }
 };
 void test20231002()
 {
@@ -1728,6 +1735,42 @@ void test20231002()
     run.getNumber(0); // 但是非常量对象是可以调用常量函数的
     // 打印信息：
     // Run : int getNumber(int) const !
+}
+
+class KeMu3
+{
+public:
+    int *pInt = nullptr;
+    KeMu3()
+    {
+        pInt = new int(123);
+    }
+
+    KeMu3(KeMu3 &&) = default;
+    KeMu3 &operator=(KeMu3 &&) = default;
+    KeMu3(const KeMu3 &) = default;
+    KeMu3 &operator=(const KeMu3 &) { return *this; };
+    ~KeMu3(){};
+};
+void test20231004()
+{
+    KeMu3 keMu3_1;
+    KeMu3 keMu3_2;
+    Util::LOGI("KeMu3 move before keMu3_1:pInt is ->%s, keMu3_2:pInt is ->%s ",
+               nullptr == keMu3_1.pInt ? "null" : "not null",
+               nullptr == keMu3_2.pInt ? "null" : "not null");
+    Util::LOGI("KeMu3 keMu3_1:pInt->%p", keMu3_1.pInt);
+    Util::LOGI("KeMu3 keMu3_2:pInt->%p", keMu3_2.pInt);
+    keMu3_1 = std::move(keMu3_2);
+    Util::LOGI("KeMu3 move after : keMu3_1 = std::move(keMu3_2), keMu3_1:pInt is ->%s, keMu3_2:pInt is ->%s ",
+               nullptr == keMu3_1.pInt ? "null" : "not null",
+               nullptr == keMu3_2.pInt ? "null" : "not null");
+    Util::LOGI("KeMu3 keMu3_1:pInt->%p", keMu3_1.pInt);
+    Util::LOGI("KeMu3 keMu3_2:pInt->%p", keMu3_2.pInt);
+    KeMu3 keMu3_3 = std::move(keMu3_1);
+    Util::LOGI("KeMu3 move after :  KeMu3 keMu3_3 = std::move(keMu3_1), keMu3_1:pInt is ->%s, keMu3_3:pInt is ->%s ",
+               nullptr == keMu3_1.pInt ? "null" : "not null",
+               nullptr == keMu3_3.pInt ? "null" : "not null");
 }
 
 #include <algorithm>
@@ -1782,10 +1825,44 @@ void simpleTest()
     const int &rNumber3 = number3;
 
     Run run3;
-    auto uPtr = std::make_unique<Run>(run3);
-    auto uPtr1 = std::make_unique<Run>(run3);
+    auto uPtr = std::make_unique<Run>(run3);  // call copy constructor
+    uPtr = std::make_unique<Run>(run3);       // call unique_ptr move assignment operator
+    auto uPtr1 = std::make_unique<Run>(run3); // call copy constructor
     Util::LOGI("uPtr-->%p,uPtr1-->%p", uPtr.get(), uPtr1.get());
     auto sPtr = std::make_shared<Run>(run3);
+
+    Util::LOGI("Run4444444444444444444444.....");
+    Run run4;
+    /**
+     *  step1:
+     *  会调用unique_ptr的移动构造函数，因为std::make_unique()会
+     *  创建个临时的unique_ptr对象，但是会把这个临时的unique_ptr对象
+     *  的指向Run*的值赋值给uPtr2，然后把自己的指向Run*的值赋值为nullptr
+     *  所以临时变量的析构并不会把Run*内容给释放掉！
+     *
+     *  step2：
+     *  会调用unique_ptr的移动赋值操作函数，因为std::make_unique()会
+     *  创建个临时的unique_ptr对象，但是会把这个临时的unique_ptr对象
+     *  的指向Run*的值赋值给uPtr2，然后把自己的指向Run*的值赋值为nullptr
+     *  然后把uPtr2原来指向的Run*内容给释放掉
+     */
+    auto uPtr2 = std::make_unique<Run>(run4); // step1
+    uPtr2 = std::make_unique<Run>(run4);      // step2
+
+    KeMu3 keMu3_1;
+    std::vector<std::unique_ptr<KeMu3>> vec1;
+    int vec1Size = 5;
+    vec1.resize(vec1Size);
+    vec1[0] = std::make_unique<KeMu3>(keMu3_1);
+    for (int i = 0; i < vec1Size; i++)
+    {
+        Util::LOGI("vec1[%d]:unique_ptr's KeMu3 is %s,", i, nullptr == vec1[i].get() ? "null" : "not null");
+        if (vec1[i].get())
+        {
+            Util::LOGI("vec1[%d]:unique_ptr's KeMu3's pInt is %s,", i, nullptr == vec1[i].get()->pInt ? "null" : "not null");
+            Util::LOGI("vec1[%d]:unique_ptr's KeMu3's pInt->%p", i, vec1[i].get()->pInt);
+        }
+    }
 
     Util::LOGI("simpleTest-simpleTest-simpleTest-simpleTest-simpleTest...........end");
 }
@@ -1975,6 +2052,9 @@ void tempTest()
 
     Util::LOGI("\n-----------------tempTest:20231002----------------------");
     test20231002();
+
+    Util::LOGI("\n-----------------tempTest:20231004----------------------");
+    test20231004();
 
     simpleTest();
 }
