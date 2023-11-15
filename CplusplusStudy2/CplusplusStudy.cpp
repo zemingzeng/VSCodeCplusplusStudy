@@ -1851,7 +1851,7 @@ void test20231026()
 }
 
 #include <algorithm>
-void -simpleTest()
+void simpleTest()
 {
     Util::LOGI("\n\nsimpleTest-simpleTest-simpleTest-simpleTest-simpleTest...........begin");
 
@@ -1946,7 +1946,7 @@ void -simpleTest()
         for (int i = 0; i < 10; ++i)
         {
             Util::LOGI("thread count i->%d", i);
-            std::this_thread::sleep_for(std::chrono::milliseconds(300));
+            std::this_thread::sleep_for(std::chrono::milliseconds(30));
         }; });
     if (t.joinable())
         t.detach();
@@ -2147,7 +2147,7 @@ void tempTest()
     test20231016();
 
     simpleTest();
-    std::this_thread::sleep_for(std::chrono::milliseconds(10000));
+    //std::this_thread::sleep_for(std::chrono::milliseconds(10000));
 }
 
 class SingleTon

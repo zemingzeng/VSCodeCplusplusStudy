@@ -5,7 +5,7 @@ using namespace mingzz;
 
 DemuxThread::DemuxThread() /*: mAVFContext(nullptr)*/
 {
-    memset(mAVErrorInfo, 0, sizeof(mAVErrorInfo));
+    //memset(mAVErrorInfo, 0, sizeof(mAVErrorInfo));
 }
 
 DemuxThread::~DemuxThread()
