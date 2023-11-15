@@ -6,17 +6,19 @@
 class DemuxThread : public Thread
 {
 public:
-    int init();
-    int start();
-    int stop();
-    void join();
-    void detach();
+    int init(const char *);
+    DemuxThread();
+    ~DemuxThread();
 
-protected:
+private:
     void run() override;
 
 private:
-    std::string url;
+    char mAVErrorInfo[256];
+    std::string mUrl;
+    // AVPacketQueue *mVQueue; // video packet queue
+    // AVPacketQueue *mAQueue; // audio packet queue
+    // AVFormatContext* mAVFContext;
 };
 
 #endif

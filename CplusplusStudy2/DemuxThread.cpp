@@ -3,6 +3,15 @@
 #include <iostream>
 using namespace mingzz;
 
+DemuxThread::DemuxThread() /*: mAVFContext(nullptr)*/
+{
+    memset(mAVErrorInfo, 0, sizeof(mAVErrorInfo));
+}
+
+DemuxThread::~DemuxThread()
+{
+}
+
 void DemuxThread::run()
 {
     Util::LOGI("DemuxThread run()!");
@@ -12,49 +21,18 @@ void DemuxThread::run()
     while (count < 3)
     {
         Util::LOGI("DemuxThread running and count:%d", count);
-        std::this_thread::sleep_for(std::chrono::milliseconds(500));
+        std::this_thread::sleep_for(std::chrono::milliseconds(100));
         count++;
     }
 }
 
-void DemuxThread::join()
+int DemuxThread::init(const char *url)
 {
-    Util::LOGI("DemuxThread join()!");
-    if (t)
-    {
-        t->join();
-    }
-}
-
-void DemuxThread::detach()
-{
-      Util::LOGI("DemuxThread detach()!");
-    if (t)
-    {
-        t->detach();
-    } 
-}
-
-int DemuxThread::init()
-{
-    Util::LOGI("DemuxThread init()!");
-    return 0;
-}
-int DemuxThread::start()
-{
-    Util::LOGI("DemuxThread::start()!");
-    t = new std::thread(&DemuxThread::run, this); // new完，thread就自动启动了
-    if (!Thread::t)
-    {
-        Util::LOGI("new std::thread error!");
-        return -1;
-    }
-    return 0;
-}
-
-int DemuxThread::stop()
-{
-    Util::LOGI("DemuxThread::stop()!");
-    Thread::stop();
+    Util::LOGI("DemuxThread::init() : Url->%s!", url);
+    mUrl = url;
+    // mAVFContext = avformat_alloc_context();
+    // if(!mAVFContext){}
+    // int ret = avformat_open_input(&mAVFContext, mUrl, nullptr, nullptr);
+    // av_strerror(ret, mAVErrorInfo, sizeof(mAVErrorInfo));
     return 0;
 }

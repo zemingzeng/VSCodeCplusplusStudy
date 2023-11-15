@@ -9,12 +9,15 @@ public:
     ~Thread();
     int start();
     int stop();
+    void join();
+    void detach();
 
 private:
-
-protected:
-    std::thread *t = nullptr;
     virtual void run() = 0;
+
+private:
+    int mAbort;
+    std::thread *mpThread;
 };
 
 #endif

@@ -36,15 +36,17 @@ template <typename T>
 int SafeQueue<T>::pop(T &t, int timeOut /*milliseconds*/)
 {
     std::lock_guard<std::mutex> lock(mMutex);
-    if (mQueue.empty)
+    bool ret = true;
+    if (mQueue.empty())
     {
         // 等待唤醒或者等待push
-        mCondition.wait_for(lock, std::chrono::milliseconds(timeOut),
-                            [this]() -> bool
-                            {
-                                return !mQueue.empty | mAbort; // 等待期间，会判断此条件，返回true会立马返回
-                                                               // 继续运行，否则，还会wait，等待下一次notify
-                            });
+        ret = mCondition.wait_for(lock, std::chrono::milliseconds(timeOut),
+                                  [this]() -> bool
+                                  {
+                                      return !mQueue.empty() | mAbort; // 判断此条件，返回true会继续执行下面的代码
+                                                                       // 否则，还会wait，等待下一次notify
+                                  });
+        // 取到数据
     }
-    return 0;
+    return true == ret ? 0 : -1;
 }

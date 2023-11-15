@@ -1,7 +1,7 @@
 #include "thread.h"
 #include "Util.hpp"
 using namespace mingzz;
-Thread::Thread()
+Thread::Thread() : mAbort(0), mpThread(nullptr)
 {
     Util::LOGI("Thread constructor!");
 }
@@ -9,7 +9,7 @@ Thread::Thread()
 Thread::~Thread()
 {
     Util::LOGI("Thread destructor!");
-    if (t)
+    if (mpThread)
     {
         Thread::stop();
     }
@@ -17,20 +17,48 @@ Thread::~Thread()
 
 int Thread::start()
 {
-    Util::LOGI("Thread::start()");
+    Util::LOGI("Thread::start()!");
+    mpThread = new std::thread(&run, this); // new完，thread就自动启动了
+    if (!mpThread)
+    {
+        Util::LOGI("new std::thread error!");
+        return -1;
+    }
     return 0;
 }
 
 int Thread::stop()
 {
     Util::LOGI("Thread::stop()");
-    if (t)
+    mAbort = 1;
+    if (mpThread)
     {
-        // t->join(); //等待任务完成然后才delete
         Util::LOGI("before delete t");
-        delete t;
+        join(); // 等待任务完成然后才delete,
+                // 会阻塞此线程直到mpThread任务处理完成然后返回
+        delete mpThread;
         Util::LOGI("after delete t");
-        t = nullptr;
+        mpThread = nullptr;
     }
     return 0;
+}
+
+void Thread::join()
+{
+    Util::LOGI("Thread join()!");
+    if (mpThread)
+    {
+        if (mpThread->joinable())
+            mpThread->join();
+    }
+}
+
+void Thread::detach()
+{
+    Util::LOGI("Thread detach()!");
+    if (mpThread)
+    {
+        if (mpThread->joinable())
+            mpThread->detach();
+    }
 }

@@ -1773,10 +1773,87 @@ void test20231004()
                nullptr == keMu3_3.pInt ? "null" : "not null");
 }
 
-#include <algorithm>
-void simpleTest()
+#include <optional>
+template <typename T>
+class TemplateClass
 {
-    Util::LOGI("simpleTest-simpleTest-simpleTest-simpleTest-simpleTest...........begin");
+public:
+    ~TemplateClass()
+    {
+    }
+    TemplateClass(const TemplateClass &)
+    {
+        Util::LOGI("TemplateClass(const TemplateClass &)!");
+    }
+    TemplateClass(TemplateClass &&)
+    {
+        Util::LOGI("TemplateClass( TemplateClass &&)!");
+    }
+    TemplateClass()
+    {
+    }
+    void test1() {}
+    void test2() {}
+    void test3() {}
+    void test4() {}
+};
+
+template class TemplateClass<double>; // 显示模板化，编译器会自动生成模板中方法的代码
+                                      // 如果没有这个声明，则编译器只会生成用到的相关代码和虚拟方法
+                                      // 未用到的代码，编译器不会生成
+void test20231016()
+{
+    std::optional<int> oplNum = {};
+    if (std::nullopt == oplNum)
+    {
+        Util::LOGI("oplNum = {} is nullopt!!");
+        Util::LOGI("oplNum = {} has Value->%s!!", oplNum.has_value() ? "true" : "false");
+    }
+    else
+    {
+        Util::LOGI("std::optional<int> oplNum value->%d!!", oplNum.value());
+    }
+    oplNum.value_or(173);
+    Util::LOGI("oplNum = {}; oplNum.value_or(173)->%d!!", oplNum.value_or(173));
+
+    TemplateClass<int> templateClass;
+    // TemplateClass templateClass1 = templateClass;
+
+    int number = 9;
+    int number1{4};
+    int number2(3);
+
+    std::optional<TemplateClass<int>> oplTemplateClass{templateClass};         // call copy constructor
+    std::optional<TemplateClass<int>> oplTemplateClass1{oplTemplateClass};     // call copy constructor
+    std::optional<TemplateClass<int>> oplTemplateClass2{TemplateClass<int>{}}; // call copy constructor if no move constuctor!
+}
+
+template <typename T>
+class CVBS
+{
+public:
+    template <typename E>
+    void copyFormOther(CVBS<E>);
+};
+template <typename T>
+template <typename E>
+void CVBS<T>::copyFormOther(CVBS<E> cvbsE)
+{
+}
+
+template <>
+class CVBS<int>
+{ // 模板具现化
+public:
+};
+void test20231026()
+{
+}
+
+#include <algorithm>
+void -simpleTest()
+{
+    Util::LOGI("\n\nsimpleTest-simpleTest-simpleTest-simpleTest-simpleTest...........begin");
 
     int *nullptrInt = nullptr;
     delete nullptrInt;
@@ -1864,7 +1941,17 @@ void simpleTest()
         }
     }
 
-    Util::LOGI("simpleTest-simpleTest-simpleTest-simpleTest-simpleTest...........end");
+    std::thread t([]()
+                  {
+        for (int i = 0; i < 10; ++i)
+        {
+            Util::LOGI("thread count i->%d", i);
+            std::this_thread::sleep_for(std::chrono::milliseconds(300));
+        }; });
+    if (t.joinable())
+        t.detach();
+
+    Util::LOGI("simpleTest-simpleTest-simpleTest-simpleTest-simpleTest...........end\n\n");
 }
 
 void tempTest()
@@ -1907,7 +1994,7 @@ void tempTest()
         return number;
     }(1);
     DemuxThread demuxThread;
-    demuxThread.init();
+    demuxThread.init("https://a.b.mp4");
     demuxThread.start();
     // demuxThread.detach();
     demuxThread.join();
@@ -2056,7 +2143,11 @@ void tempTest()
     Util::LOGI("\n-----------------tempTest:20231004----------------------");
     test20231004();
 
+    Util::LOGI("\n-----------------tempTest:20231016----------------------");
+    test20231016();
+
     simpleTest();
+    std::this_thread::sleep_for(std::chrono::milliseconds(10000));
 }
 
 class SingleTon
