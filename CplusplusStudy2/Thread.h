@@ -8,15 +8,14 @@ public:
     Thread();
     ~Thread();
     int start();
-    int stop();
     void join();
     void detach();
+    int stop();
 
 private:
     virtual void run() = 0;
 
 private:
-    int mAbort;
     std::thread *mpThread;
 };
 

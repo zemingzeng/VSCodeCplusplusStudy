@@ -1,7 +1,7 @@
 #include "thread.h"
 #include "Util.hpp"
 using namespace mingzz;
-Thread::Thread() : mAbort(0), mpThread(nullptr)
+Thread::Thread() : mpThread(nullptr)
 {
     Util::LOGI("Thread constructor!");
 }
@@ -30,7 +30,6 @@ int Thread::start()
 int Thread::stop()
 {
     Util::LOGI("Thread::stop()");
-    mAbort = 1;
     if (mpThread)
     {
         Util::LOGI("before delete t");
