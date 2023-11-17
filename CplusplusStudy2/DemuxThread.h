@@ -8,11 +8,11 @@ class DemuxThread : public Thread
 public:
     DemuxThread();
     ~DemuxThread();
+    int init(const char *);
     void stop();
 
 private:
     void run() override;
-    int init(const char *);
 
 private:
     int mAbort;

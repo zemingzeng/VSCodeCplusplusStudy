@@ -43,6 +43,15 @@ void DemuxThread::run()
         //     av_strerror(ret, mAVErrorInfo, sizeof(mAVErrorInfo)); // 把错误码转化成string
         //     break;
         // }
+        // if (mVideoIndex == pkt.stream_index)
+        // {
+        //     // put into video pkt queue
+        // }
+        // else if (mAudioIndex == pkt.stream_index)
+        // {
+        //     // put into audio pkt queue
+        // }
+        // av_packet_unref(&pkt); // 释放
     }
 
     int count = 0;
@@ -80,6 +89,10 @@ int DemuxThread::init(const char *url)
 
     // mVideoIndex = av_find_best_stream(mAVFContext, AVMEDIA_TPYE_VIDEO, -1, -1, nullptr, 0);
     // mAudioIndex = av_find_best_stream(mAVFContext, AVMEDIA_TPYE_AUDIO, -1, -1, nullptr, 0);
+    if (mVideoIndex < 0 || mAudioIndex < 0)
+    {
+        // audio or video stream data not found!!
+    }
 
     return 0;
 }

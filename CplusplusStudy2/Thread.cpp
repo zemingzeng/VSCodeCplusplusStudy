@@ -8,17 +8,12 @@ Thread::Thread() : mpThread(nullptr)
 
 Thread::~Thread()
 {
-    Util::LOGI("Thread destructor!");
-    if (mpThread)
-    {
-        Thread::stop();
-    }
 }
 
 int Thread::start()
 {
     Util::LOGI("Thread::start()!");
-    mpThread = new std::thread(&run, this); // new完，thread就自动启动了
+    mpThread = new std::thread(&Thread::run, this); // new完，thread就自动启动了
     if (!mpThread)
     {
         Util::LOGI("new std::thread error!");

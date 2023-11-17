@@ -1850,6 +1850,47 @@ void test20231026()
 {
 }
 
+class LLD
+{
+public:
+    std::thread *mpThread;
+    // virtual void run() = 0;
+    virtual void run()
+    {
+        Util::LOGI("LLD : virtual void run()!");
+    }
+    void start()
+    {
+        mpThread = new std::thread(&LLD::run,this);
+        run(); //子类调用start函数，则run（virtual）也是调用子类的
+    }
+};
+class LDLLD : public LLD
+{
+public:
+    virtual void run()
+    {
+        Util::LOGI("LDLLD : virtual void run()!");
+    }
+};
+class LDLLD1 : public LLD
+{
+public:
+    virtual void run()
+    {
+        Util::LOGI("LDLLD1 : virtual void run()!");
+    }
+};
+void test20231116()
+{
+    LLD* lld_ =new LDLLD();
+    lld_->start();
+    LDLLD lld;
+    lld.start();
+    LDLLD1 lld1;
+    lld1.start();
+}
+
 #include <algorithm>
 void simpleTest()
 {
@@ -2146,8 +2187,14 @@ void tempTest()
     Util::LOGI("\n-----------------tempTest:20231016----------------------");
     test20231016();
 
+    Util::LOGI("\n-----------------tempTest:20231026----------------------");
+    test20231026();
+
+    Util::LOGI("\n-----------------tempTest:20231116----------------------");
+    test20231116();
+
     simpleTest();
-    //std::this_thread::sleep_for(std::chrono::milliseconds(10000));
+    // std::this_thread::sleep_for(std::chrono::milliseconds(10000));
 }
 
 class SingleTon

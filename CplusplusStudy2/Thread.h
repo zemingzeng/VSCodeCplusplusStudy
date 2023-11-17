@@ -6,7 +6,7 @@ class Thread
 {
 public:
     Thread();
-    ~Thread();
+    virtual ~Thread();
     int start();
     void join();
     void detach();

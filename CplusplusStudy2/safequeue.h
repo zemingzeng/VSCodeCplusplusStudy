@@ -1,3 +1,13 @@
+/**
+ * @file safequeue.h
+ * @author your name (zemingzeng@126.com)
+ * @brief
+ * @version 0.1
+ * @date 2023-11-17
+ *
+ * @copyright Copyright (c) 2023
+ *
+ */
 #ifndef SAFEQUEUE_H
 #define SAFEQUEUE_H
 #include <queue>
@@ -15,7 +25,7 @@ public:
     ~SafeQueue();
     void abort();
     int push(T t);
-    int pop(T& t,int timeOut=0);
+    int pop(T &t, int timeOut = 0);
 
 private:
     int mAbort;
