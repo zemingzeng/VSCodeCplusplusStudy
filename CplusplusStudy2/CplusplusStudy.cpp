@@ -1861,8 +1861,8 @@ public:
     }
     void start()
     {
-        mpThread = new std::thread(&LLD::run,this);
-        run(); //子类调用start函数，则run（virtual）也是调用子类的
+        mpThread = new std::thread(&LLD::run, this);
+        run(); // 子类调用start函数，则run（virtual）也是调用子类的
     }
 };
 class LDLLD : public LLD
@@ -1883,12 +1883,68 @@ public:
 };
 void test20231116()
 {
-    LLD* lld_ =new LDLLD();
+    LLD *lld_ = new LDLLD();
     lld_->start();
     LDLLD lld;
     lld.start();
     LDLLD1 lld1;
     lld1.start();
+}
+
+class QueueItem
+{
+public:
+    int isDeConsturct = 0;
+    QueueItem()
+    {
+        Util::LOGI("QueueItem : QueueItem()!!");
+    }
+    QueueItem(const QueueItem &rQueueItem)
+    {
+        Util::LOGI("QueueItem : QueueItem(const QueueItem& rQueueItem)!!");
+    }
+    ~QueueItem()
+    {
+        isDeConsturct = 1;
+        Util::LOGI("QueueItem : ~QueueItem()!!");
+    }
+    QueueItem &operator=(const QueueItem &)
+    {
+        Util::LOGI("QueueItem :  QueueItem& operator(const QueueItem& )!!");
+        return *this;
+    }
+    QueueItem(QueueItem &&)
+    {
+        Util::LOGI("QueueItem : QueueItem(QueueItem&& )!!");
+    }
+    QueueItem &operator=(QueueItem &&)
+    {
+        Util::LOGI("QueueItem : QueueItem& operator=(QueueItem&& )!!");
+        return *this;
+    }
+    void showInfo()
+    {
+        Util::LOGI("QueueItem : showInfo() -> i am alive!!! isDeConsturct->%d", isDeConsturct);
+    }
+};
+
+void test20231117()
+{
+    QueueItem queueItem;
+    Util::LOGI("before queue push!!!!");
+    std::queue<QueueItem> mQueue;
+    mQueue.push(queueItem); // push的是一个引用
+    Util::LOGI("after queue push!!!!");
+
+    Util::LOGI("before queue front!!!!");
+    QueueItem queueItem1 = mQueue.front();
+    Util::LOGI("after queue front!!!!");
+
+    Util::LOGI("before queue pop!!!!");
+    mQueue.pop();
+    Util::LOGI("after queue pop!!!!");
+
+    queueItem1.showInfo();
 }
 
 #include <algorithm>
@@ -2192,6 +2248,9 @@ void tempTest()
 
     Util::LOGI("\n-----------------tempTest:20231116----------------------");
     test20231116();
+
+    Util::LOGI("\n-----------------tempTest:20231117----------------------");
+    test20231117();
 
     simpleTest();
     // std::this_thread::sleep_for(std::chrono::milliseconds(10000));
