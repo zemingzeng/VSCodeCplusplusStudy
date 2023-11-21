@@ -1947,6 +1947,119 @@ void test20231117()
     queueItem1.showInfo();
 }
 
+class Subject
+{
+public:
+    int number;
+    int number1;
+    void getName(std::string)
+    {
+        Util::LOGI("Subject : void getName(std::string)!!");
+    }
+    virtual void A()
+    {
+        Util::LOGI("Subject : virtual void A()!!");
+    }
+    virtual void B()
+    {
+        Util::LOGI("Subject : virtual void B()!!");
+    }
+    virtual void C()
+    {
+        Util::LOGI("Subject : virtual void C()!!");
+    }
+};
+class Chinese : public Subject
+{
+public:
+    void getName()
+    {
+        Util::LOGI("Chinese : void getName(std::string)!!");
+    }
+    virtual void D()
+    {
+        Util::LOGI("Chinese : virtual void D()!!");
+    }
+    void A() override
+    {
+        Util::LOGI("Chinese :  void A() override()!!");
+    }
+};
+using PMethod = void (*)();
+
+class English
+{
+public:
+    English()
+    {
+        memset(this, 0, sizeof(long long *));
+    }
+    int number;
+    virtual void getName(){};
+};
+void test20231120()
+{
+    Subject *pSubject = new Subject();
+    Util::LOGI("pSubject ->%p , &pSubject->number ->%p , &pSubject->number1 ->%p",
+               pSubject, &pSubject->number, &pSubject->number1);
+    // 打印信息：
+    // 最前面的8个字节是虚函数表指针(有虚拟函数时的打印)
+    // pSubject ->000002076572cf90 , &pSubject->number ->000002076572cf98 , &pSubject->number1 ->000002076572cf9c
+    // 去掉虚拟函数的时候的打印
+    // pSubject ->0000026942bcbe10 , &pSubject->number ->0000026942bcbe10 , &pSubject->number1 ->0000026942bcbe14
+
+    Chinese chinese;
+    // chinese.getName("str"); // error，重载了，会把基类的函数隐藏了
+    Subject *pChinese = new Chinese();
+    // pChinese->getName(); //error, no match method, 调用的是基类的函数（没有virtual）
+    pChinese->getName("");
+
+    Chinese *pChinese1 = new Chinese();
+    long long *pVirtualTablePtr = (long long *)(*(long long *)pChinese1);
+    for (int i = 0; i < 4; ++i)
+    {
+        PMethod pMethod;
+        pMethod = (PMethod)pVirtualTablePtr[i];
+        pMethod();
+    }
+    // 打印信息：
+    // Chinese :  void A() override()!!
+    // Subject : virtual void B()!!
+    // Subject : virtual void C()!!
+    // Chinese : virtual void D()!!
+    delete pChinese, pChinese1;
+
+    Util::LOGI("sizeof(long long*)->%d", sizeof(long long *));
+    Util::LOGI("sizeof(long long)->%d", sizeof(long long));
+    Util::LOGI("sizeof(long )->%d", sizeof(long));
+    Util::LOGI("sizeof(int )->%d", sizeof(int));
+    Util::LOGI("sizeof(PMethod )->%d", sizeof(PMethod));
+    Util::LOGI("sizeof(Chinese::A )->%d", sizeof(Chinese::A));
+    // 打印信息：
+    // sizeof(long long*)->8
+    // sizeof(long long)->8
+    // sizeof(long )->4
+    // sizeof(int )->4
+    // sizeof(PMethod )->8
+    // sizeof(Chinese::A )->16
+
+    English english;
+    Util::LOGI("&english->%p , &english.number->%p , &English::getName->%p , (long long*)(*(long long*)(&pEnglish)->%p",
+               &english, &english.number, &English::getName, (long long *)(*(long long *)&english));
+    english.getName();
+    // 非指针和引用类型调用虚函数，采用的是静态联编，编译时就绑定了函数地址，而不像
+    // 指针和引用一样，当调用虚函数时是动态联编，需要动态找虚函数表中的对应的函数指针
+    // 所以针对memset(this, 0, sizeof(long long *));在English构造中调用时
+    // 虽然把虚函数表指针置为nullptr，指针或引用调用getName时会程序中断，但是
+    // 对于非指针和引用的对象调用getName时就不会程序中断，因为调用时不会走虚函数表指针去找
+    // 对应的函数地址，而是在编译的时候就直接绑定好了函数地址。所以可以直接调用而不会程序中断
+    English *pEnglish = new English();
+    Util::LOGI("pEnglish->%p , pEnglish->number->%p , (long long*)(*(long long*)pEnglish->%p",
+               pEnglish, &pEnglish->number, (long long *)(*(long long *)pEnglish));
+    // pEnglish->getName(); //error ，构造函数中把这个对象虚函数表赋值为0
+    delete pEnglish;
+}
+
 #include <algorithm>
 void simpleTest()
 {
@@ -2251,6 +2364,9 @@ void tempTest()
 
     Util::LOGI("\n-----------------tempTest:20231117----------------------");
     test20231117();
+
+    Util::LOGI("\n-----------------tempTest:20231120----------------------");
+    test20231120();
 
     simpleTest();
     // std::this_thread::sleep_for(std::chrono::milliseconds(10000));

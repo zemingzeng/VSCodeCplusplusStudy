@@ -50,8 +50,9 @@ void DemuxThread::run()
         // else if (mAudioIndex == pkt.stream_index)
         // {
         //     // put into audio pkt queue
+        // } else {
+               // av_packet_unref(&pkt); // 释放
         // }
-        // av_packet_unref(&pkt); // 释放
     }
 
     int count = 0;

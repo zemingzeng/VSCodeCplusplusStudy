@@ -30,6 +30,17 @@ void SafeQueue<T>::abort()
 }
 
 template <typename T>
+int SafeQueue<T>::size()
+{
+    std::lock_guard<std::mutex> lock(mMutex); // 获取锁
+    if (1 == mAbort)
+    {
+        return -1;
+    }
+    return mQueue.size();
+}
+
+template <typename T>
 int SafeQueue<T>::push(T t)
 {
     std::lock_guard<std::mutex> lock(mMutex); // 获取锁
@@ -41,6 +52,22 @@ int SafeQueue<T>::push(T t)
     mQueue.push(t);
     mCondition.notify_one(); // 尝试唤醒 wait
     return 0;
+}
+
+template <typename T>
+int SafeQueue<T>::front(T &t)
+{
+    std::lock_guard<std::mutex> lock(mMutex);
+    if (1 == mAbort)
+    {
+        return -1;
+    }
+    if (mQueue.empty())
+    {
+        return -1;
+    }
+    t = mQueue.front();
+    retun 0;
 }
 
 template <typename T>

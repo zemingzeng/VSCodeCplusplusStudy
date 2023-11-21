@@ -26,6 +26,8 @@ public:
     void abort();
     int push(T t);
     int pop(T &t, int timeOut = 0);
+    int front(T &t);
+    int size();
 
 private:
     int mAbort;
