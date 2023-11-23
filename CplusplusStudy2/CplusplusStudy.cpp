@@ -2161,6 +2161,8 @@ void simpleTest()
     if (t.joinable())
         t.detach();
 
+    SafeQueue<int> queue;
+
     Util::LOGI("simpleTest-simpleTest-simpleTest-simpleTest-simpleTest...........end\n\n");
 }
 

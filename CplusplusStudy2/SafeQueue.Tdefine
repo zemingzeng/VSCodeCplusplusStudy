@@ -9,8 +9,6 @@
  *
  */
 
-#include "safequeue.h"
-
 template <typename T>
 SafeQueue<T>::SafeQueue() : mAbort(0)
 {
@@ -67,7 +65,7 @@ int SafeQueue<T>::front(T &t)
         return -1;
     }
     t = mQueue.front();
-    retun 0;
+    return 0;
 }
 
 template <typename T>

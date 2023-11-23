@@ -36,4 +36,6 @@ private:
     std::condition_variable mCondition;
 };
 
+#include "SafeQueue.Tdefine"
+
 #endif
