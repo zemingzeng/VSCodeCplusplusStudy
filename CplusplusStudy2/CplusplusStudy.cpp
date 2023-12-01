@@ -2060,6 +2060,106 @@ void test20231120()
     delete pEnglish;
 }
 
+class Game
+{
+public:
+    virtual void show() = 0;
+    void show1() { std::cout << "Game show1()!!" << std::endl; };
+    void say() {}
+    void myBaseShow();
+};
+void Game::myBaseShow()
+{
+    std::cout << "Game myBaseShow!!" << std::endl;
+    printf("Game method show-->OX%x myBaseShow-->OX%x\n", &Game::show, &Game::myBaseShow);
+}
+class TearsOfKing : public Game
+{
+public:
+    int number;
+    void show() override;
+    void show1();
+    void myShow(int);
+};
+void TearsOfKing::show()
+{
+    std::cout << "TearsOfKing show!!" << std::endl;
+    printf("TearsOfKing::number --> Ox%x Ox%x \n", &TearsOfKing::number, &(TearsOfKing::number));
+    auto auto_1 = &TearsOfKing::number;
+    auto auto_3 = &TearsOfKing::show1;
+    auto auto_4 = &(TearsOfKing::show1);
+    auto auto_2 = &(TearsOfKing::number);
+}
+void TearsOfKing::show1()
+{
+    std::cout << "TearsOfKing show1!!" << std::endl;
+}
+void TearsOfKing::myShow(int a)
+{
+    std::cout << "TearsOfKing myShow!!" << std::endl;
+    Util::LOGI("TearsOfKing mthod show-->OX%x  myShow-->OX%x \n", &TearsOfKing::show, &TearsOfKing::myShow);
+    Util::LOGI("TearsOfKing mthod Game show-->OX%x \n", &Game::show);
+    Util::LOGI("TearsOfKing mthod Game show1-->OX%x \n", &(Game::show1));
+    Util::LOGI("TearsOfKing mthod show1-->OX%x \n", &TearsOfKing::show1);
+    Util::LOGI("TearsOfKing mthod Game myBaseShow-->OX%x \n", &Game::myBaseShow);
+    Util::LOGI("TearsOfKing mthod Game say-->OX%x \n", &Game::say);
+    Util::LOGI("TearsOfKing this-->OX%x \n", this);
+    // Subject::show();
+    using PMethod = void (*)();
+    void *pVoid = (void *)&Game::show1;
+    Util::LOGI(" pVoid-->OX%x \n", pVoid);
+    Util::LOGI(" &Game::show1-->OX%x \n", &Game::show1);
+    Util::LOGI(" (int*)&Game::show1-->OX%x \n", (int *)(void *)&Game::show1);
+    PMethod pMethod = (PMethod)(pVoid);
+    pMethod();
+    int number = 9;
+    TearsOfKing tearsOfKing1;
+    Util::LOGI(" &number-->OX%x \n", &number);
+    Util::LOGI(" (void*)&tearsOfKing1-->OX%x \n", (void *)&tearsOfKing1);
+    Util::LOGI(" (int*)&tearsOfKing1-->OX%x \n", (int *)&tearsOfKing1);
+    Util::LOGI(" (long long*)&tearsOfKing1-->OX%x \n", (long long *)&tearsOfKing1);
+    show();
+}
+class Tired
+{
+public:
+    void method1(){};
+    void method2(){};
+    void method3(){};
+};
+class Boring
+{
+public:
+    void a(){};
+    void b(){};
+    void c(){};
+};
+#include <typeinfo>
+void test20231129()
+{
+    TearsOfKing *tearsOfKing = new TearsOfKing;
+    tearsOfKing->say();
+    tearsOfKing->myBaseShow();
+    tearsOfKing->myShow(1);
+    Util::LOGI("tearsOfKing->OX%x", tearsOfKing);
+    Util::LOGI("Game------>OX%x", &Game::show);
+    Util::LOGI("Game------>OX%x", &Game::show1);
+    Util::LOGI("TearsOfKing------>OX%x", &TearsOfKing::show1);
+    Util::LOGI("TearsOfKing------>OX%x", &TearsOfKing::show);
+    Util::LOGI("TearsOfKing------>OX%x", &TearsOfKing::myShow);
+    Util::LOGI("Tired-------->OX%x", &Tired::method1);
+    Util::LOGI("Tired-------->OX%x", &Tired::method2);
+    Util::LOGI("Tired-------->OX%x", &Tired::method3);
+    Util::LOGI("Boring-------->OX%x", &Boring::a);
+    Util::LOGI("Boring-------->OX%x", &Boring::b);
+    Util::LOGI("Boring-------->OX%x", &Boring::c);
+    // long long* vTable= (long long*)(*(long long*)tearsOfKing);
+    // Util::LOGI("v table[0]->tearsOfKing ->%p", vTable[0]);
+    // Util::LOGI("v table[1]->tearsOfKing ->%p", vTable[1]);
+    // Util::LOGI("v table[1]->tearsOfKing ->%p", vTable[2]);
+    tearsOfKing->myBaseShow();
+}
+
 #include <algorithm>
 void simpleTest()
 {
@@ -2161,7 +2261,9 @@ void simpleTest()
     if (t.joinable())
         t.detach();
 
-    SafeQueue<int> queue;
+    // SafeQueue<int> queue;
+    Boring boring;
+    Util::LOGI("sizeof boring-->%d", sizeof(boring));
 
     Util::LOGI("simpleTest-simpleTest-simpleTest-simpleTest-simpleTest...........end\n\n");
 }
@@ -2369,6 +2471,9 @@ void tempTest()
 
     Util::LOGI("\n-----------------tempTest:20231120----------------------");
     test20231120();
+
+    Util::LOGI("\n-----------------tempTest:20231129----------------------");
+    test20231129();
 
     simpleTest();
     // std::this_thread::sleep_for(std::chrono::milliseconds(10000));
